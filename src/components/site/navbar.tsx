@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag, Sprout } from "lucide-react";
+import { Menu, ShoppingBag } from "lucide-react";
 
 import { useCart } from "@/components/shop/cart-provider";
 import { Button } from "@/components/ui/button";
@@ -41,8 +42,15 @@ export function Navbar() {
           className="flex items-center gap-3 rounded-full transition hover:cursor-pointer"
           aria-label="Mulch Movers home"
         >
-          <span className="flex size-11 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-900/20">
-            <Sprout className="size-6" />
+          <span className="relative size-12 overflow-hidden rounded-2xl shadow-lg shadow-emerald-900/20">
+            <Image
+              src="/mulch-movers-logo.png"
+              alt="Mulch Movers logo"
+              fill
+              sizes="48px"
+              className="object-cover"
+              priority
+            />
           </span>
           <span className="leading-tight">
             <span className="block text-lg font-black tracking-tight text-emerald-950">

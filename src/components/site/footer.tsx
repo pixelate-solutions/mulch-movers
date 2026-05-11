@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Mail, MapPin, Phone, Sprout } from "lucide-react";
+import Image from "next/image";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 
@@ -17,8 +18,14 @@ export function Footer() {
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.3fr_1fr_1fr] lg:px-8">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-emerald-500 text-white">
-              <Sprout className="size-6" />
+            <span className="relative size-12 overflow-hidden rounded-2xl shadow-lg shadow-black/20">
+              <Image
+                src="/mulch-movers-logo.png"
+                alt="Mulch Movers logo"
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
             </span>
             <div>
               <p className="text-xl font-black tracking-tight">Mulch Movers</p>
