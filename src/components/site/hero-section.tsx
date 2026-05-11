@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, CalendarClock, MapPin, PackageCheck, Truck } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarClock,
+  MapPin,
+  PackageCheck,
+  ShieldCheck,
+  Truck,
+} from "lucide-react";
 
 import { GlassCard } from "@/components/site/glass-card";
 import { Button } from "@/components/ui/button";
@@ -19,8 +26,8 @@ export function HeroSection() {
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:py-16">
         <div className="max-w-3xl">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/70 px-4 py-2 text-sm font-bold text-emerald-800 shadow-sm backdrop-blur">
-            <Truck className="size-4" />
-            Local supplier sourcing + fast delivery
+            <ShieldCheck className="size-4" />
+            Veteran owned + fast local delivery
           </div>
           <h1 className="text-balance text-5xl font-black tracking-tight text-emerald-950 sm:text-6xl lg:text-7xl">
             Fast Mulch Delivery in Metro Detroit.
@@ -33,6 +40,16 @@ export function HeroSection() {
           <p className="mt-3 max-w-2xl text-base leading-7 text-emerald-950/62">
             Mulch, gravel, sand, soil, and more delivered without the hassle.
           </p>
+          <div className="mt-5 flex flex-wrap gap-2 text-sm font-bold text-emerald-800">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm backdrop-blur">
+              <ShieldCheck className="size-4" />
+              Veteran owned
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm backdrop-blur">
+              <Truck className="size-4" />
+              Metro Detroit delivery
+            </span>
+          </div>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
               <Link href="/shop">

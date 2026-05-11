@@ -57,7 +57,7 @@ export function Navbar() {
               Mulch Movers
             </span>
             <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
-              Metro Detroit
+              Veteran Owned
             </span>
           </span>
         </Link>

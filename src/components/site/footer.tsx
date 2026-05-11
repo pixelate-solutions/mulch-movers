@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 
@@ -29,12 +29,18 @@ export function Footer() {
             </span>
             <div>
               <p className="text-xl font-black tracking-tight">Mulch Movers</p>
-              <p className="text-sm text-emerald-100">Fast local material delivery</p>
+              <p className="text-sm text-emerald-100">
+                Veteran owned local material delivery
+              </p>
             </div>
           </div>
           <p className="max-w-md text-sm leading-6 text-emerald-50/75">
             We source mulch, gravel, sand, soil, and landscape materials from
             trusted Metro Detroit suppliers so your project can keep moving.
+          </p>
+          <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-emerald-100">
+            <ShieldCheck className="size-4 text-emerald-300" />
+            Veteran owned and operated
           </p>
         </div>
         <div>
