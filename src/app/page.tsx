@@ -1,65 +1,98 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, BadgeDollarSign, Boxes, MapPinned, Sparkles } from "lucide-react";
+
+import { HeroSection } from "@/components/site/hero-section";
+import { OrderSteps } from "@/components/site/order-steps";
+import { GlassCard } from "@/components/site/glass-card";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <HeroSection />
+      <OrderSteps />
+      <section className="bg-white/65 py-16">
+        <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.22em] text-emerald-700">
+              Built for busy projects
+            </p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight text-emerald-950 sm:text-4xl">
+              We find the best supplier fit, not just the nearest pile.
+            </h2>
+            <p className="mt-4 text-base leading-7 text-emerald-950/65">
+              Mulch Movers does not own inventory. We compare local supplier
+              options for price, availability, speed, and delivery location, then
+              help coordinate the drop.
+            </p>
+            <Button asChild size="lg" className="mt-7">
+              <Link href="/shop">
+                Browse materials
+                <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                title: "Local sourcing",
+                text: "Multiple trusted landscaping suppliers across Metro Detroit.",
+                icon: MapPinned,
+              },
+              {
+                title: "Material coverage",
+                text: "Mulch, gravel, limestone, sand, topsoil, compost, and more.",
+                icon: Boxes,
+              },
+              {
+                title: "Smart estimates",
+                text: "Mock cart totals show material subtotal and estimated delivery.",
+                icon: BadgeDollarSign,
+              },
+              {
+                title: "Polished ordering",
+                text: "Simple steps for address, material, quantity, and timing.",
+                icon: Sparkles,
+              },
+            ].map((feature) => (
+              <GlassCard key={feature.title} className="p-5">
+                <span className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                  <feature.icon className="size-6" />
+                </span>
+                <h3 className="text-xl font-black text-emerald-950">
+                  {feature.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-emerald-950/62">
+                  {feature.text}
+                </p>
+              </GlassCard>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+      <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="overflow-hidden rounded-[2rem] bg-emerald-950 p-6 text-white shadow-2xl shadow-emerald-950/20 sm:p-8 lg:p-10">
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <h2 className="text-3xl font-black tracking-tight sm:text-4xl">
+                Ready to price your next delivery?
+              </h2>
+              <p className="mt-3 max-w-2xl text-emerald-50/75">
+                Use the calculator, add materials to the cart, and send a request
+                when you know where and when you need it.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" variant="secondary">
+                <Link href="/calculator">Calculate quantity</Link>
+              </Button>
+              <Button asChild size="lg" className="bg-lime-400 text-emerald-950 hover:bg-lime-300">
+                <Link href="/contact">Contact us</Link>
+              </Button>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 }
