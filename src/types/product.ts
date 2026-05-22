@@ -6,8 +6,9 @@ export type Product = {
   category: ProductCategory;
   startingPrice: number;
   unit: "cubic yard";
+  maxCubicYards: number;
   description: string;
-  availability: "In stock" | "Limited today" | "Fastest delivery";
+  availability: "In stock";
   imageClassName: string;
 };
 

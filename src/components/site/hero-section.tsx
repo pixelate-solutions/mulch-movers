@@ -9,13 +9,13 @@ import {
 } from "lucide-react";
 
 import { GlassCard } from "@/components/site/glass-card";
+import { HeroAddressEstimate } from "@/components/site/hero-address-estimate";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 const supplierSignals = [
-  { label: "Brown mulch", value: "$38 / yd", icon: PackageCheck },
-  { label: "Topsoil", value: "$45 / yd", icon: MapPin },
-  { label: "Morning drop", value: "8-11 AM", icon: CalendarClock },
+  { label: "Mulch orders", value: "Up to 5 CY", icon: PackageCheck },
+  { label: "Soil, sand, stone", value: "Up to 2 CY", icon: MapPin },
+  { label: "Open schedule", value: "Live slots", icon: CalendarClock },
 ];
 
 export function HeroSection() {
@@ -27,18 +27,18 @@ export function HeroSection() {
         <div className="max-w-3xl">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/70 px-4 py-2 text-sm font-bold text-emerald-800 shadow-sm backdrop-blur">
             <ShieldCheck className="size-4" />
-            Veteran owned + fast local delivery
+            Veteran owned + automated local ordering
           </div>
           <h1 className="text-balance text-5xl font-black tracking-tight text-emerald-950 sm:text-6xl lg:text-7xl">
-            Fast Mulch Delivery in Metro Detroit.
+            Welcome to Mulch Movers LLC.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-emerald-950/70 sm:text-xl">
-            Tell us what you need, where you need it, and when you need it. We
-            source from trusted local suppliers to get you fast, affordable,
-            in-stock delivery.
+            We exist to help your landscape goals come true. We specialize in
+            small-to-mid-size residential mulch deliveries and installation.
           </p>
           <p className="mt-3 max-w-2xl text-base leading-7 text-emerald-950/62">
-            Mulch, gravel, sand, soil, and more delivered without the hassle.
+            Choose materials, installation help, site prep, debris haul away,
+            and an available schedule slot without calling for pricing.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-sm font-bold text-emerald-800">
             <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm backdrop-blur">
@@ -58,7 +58,7 @@ export function HeroSection() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="secondary">
-              <Link href="/calculator">Use Calculator</Link>
+              <Link href="/help">Help Me Choose</Link>
             </Button>
           </div>
         </div>
@@ -69,10 +69,10 @@ export function HeroSection() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-white/75">Live sourcing</p>
-                  <p className="text-2xl font-black">3 supplier options</p>
+                  <p className="text-2xl font-black">Order automation</p>
                 </div>
                 <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-bold">
-                  Same week
+                  Same site
                 </span>
               </div>
               <div className="grid gap-3">
@@ -93,12 +93,7 @@ export function HeroSection() {
               </div>
             </div>
           </div>
-          <div className="mt-4 grid gap-3 rounded-[1.5rem] border border-emerald-900/10 bg-white/75 p-4 shadow-inner shadow-emerald-950/5 backdrop-blur sm:grid-cols-[1fr_auto]">
-            <Input placeholder="Enter delivery address" aria-label="Delivery address" />
-            <Button asChild>
-              <Link href="/shop">Estimate</Link>
-            </Button>
-          </div>
+          <HeroAddressEstimate />
         </GlassCard>
       </div>
     </section>

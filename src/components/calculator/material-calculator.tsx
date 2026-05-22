@@ -23,7 +23,7 @@ export function MaterialCalculator() {
   const [length, setLength] = useState("20");
   const [width, setWidth] = useState("10");
   const [depthInches, setDepthInches] = useState("3");
-  const [customDepthFeet, setCustomDepthFeet] = useState("0.25");
+  const [customDepthInches, setCustomDepthInches] = useState("3");
   const [depthMode, setDepthMode] = useState("mulch");
 
   const result = useMemo(() => {
@@ -32,7 +32,7 @@ export function MaterialCalculator() {
     const depthFeet =
       depthMode === "mulch"
         ? (Number(depthInches) || 0) / 12
-        : Number(customDepthFeet) || 0;
+        : (Number(customDepthInches) || 0) / 12;
     const cubicYards = (parsedLength * parsedWidth * depthFeet) / 27;
 
     return {
@@ -40,7 +40,7 @@ export function MaterialCalculator() {
       rounded: Math.ceil(cubicYards),
       display: roundToTenth(cubicYards),
     };
-  }, [customDepthFeet, depthInches, depthMode, length, width]);
+  }, [customDepthInches, depthInches, depthMode, length, width]);
 
   return (
     <GlassCard className="p-5 sm:p-6">
@@ -105,13 +105,13 @@ export function MaterialCalculator() {
         </TabsContent>
         <TabsContent value="custom">
           <label className="grid gap-2 text-sm font-bold text-emerald-950">
-            Depth in feet
+            Depth in inches
             <Input
               type="number"
               min="0"
-              step="0.01"
-              value={customDepthFeet}
-              onChange={(event) => setCustomDepthFeet(event.target.value)}
+              step="0.5"
+              value={customDepthInches}
+              onChange={(event) => setCustomDepthInches(event.target.value)}
             />
           </label>
         </TabsContent>
@@ -136,10 +136,11 @@ export function MaterialCalculator() {
 
       <div className="mt-5 flex flex-col gap-3 rounded-[1.5rem] bg-lime-50 p-4 text-sm leading-6 text-emerald-950/70 sm:flex-row sm:items-center sm:justify-between">
         <p>
-          Mulch Movers can help verify the order before scheduling delivery.
+          Mulch orders are capped at 5 cubic yards online. Soil, sand, stone,
+          and debris jobs are capped at 2 cubic yards online.
         </p>
         <Button asChild variant="secondary">
-          <a href="/contact">Ask for help</a>
+          <a href="/shop">Shop materials</a>
         </Button>
       </div>
     </GlassCard>

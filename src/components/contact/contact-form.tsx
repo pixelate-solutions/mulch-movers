@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Mail, Phone, Send } from "lucide-react";
 
+import { AddressAutocomplete } from "@/components/shop/address-autocomplete";
 import { GlassCard } from "@/components/site/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState("");
 
   return (
     <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
@@ -64,13 +66,24 @@ export function ContactForm() {
             </label>
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
               Email
-              <Input required type="email" placeholder="you@example.com" />
+              <Input
+                required
+                type="email"
+                placeholder="you@example.com"
+                title="Enter a valid email address."
+              />
             </label>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
               Phone
-              <Input type="tel" placeholder="(248) 555-0123" />
+              <Input
+                type="tel"
+                inputMode="tel"
+                pattern="^\\+?1?[-.\\s]?\\(?[2-9]\\d{2}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}$"
+                placeholder="(248) 555-0123"
+                title="Enter a valid 10-digit U.S. phone number."
+              />
             </label>
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
               Material needed
@@ -90,7 +103,11 @@ export function ContactForm() {
           </div>
           <label className="grid gap-2 text-sm font-bold text-emerald-950">
             Delivery address
-            <Input placeholder="Street, city, ZIP" />
+            <AddressAutocomplete
+              onInputChange={() => setDeliveryAddress("")}
+              onSelect={(address) => setDeliveryAddress(address.label)}
+            />
+            <input type="hidden" name="deliveryAddress" value={deliveryAddress} />
           </label>
           <label className="grid gap-2 text-sm font-bold text-emerald-950">
             Message

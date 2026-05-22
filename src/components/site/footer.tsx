@@ -7,9 +7,11 @@ import { Separator } from "@/components/ui/separator";
 const quickLinks = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop Materials" },
+  { href: "/help", label: "Help Me Choose" },
   { href: "/calculator", label: "Calculator" },
   { href: "/contact", label: "Contact" },
   { href: "/cart", label: "Cart" },
+  { href: "/checkout", label: "Checkout" },
 ];
 
 export function Footer() {
@@ -35,8 +37,9 @@ export function Footer() {
             </div>
           </div>
           <p className="max-w-md text-sm leading-6 text-emerald-50/75">
-            We source mulch, gravel, sand, soil, and landscape materials from
-            trusted Metro Detroit suppliers so your project can keep moving.
+            We source and deliver landscape materials, install mulch, prepare
+            small project sites, and haul away yard debris for Metro Detroit
+            residential projects.
           </p>
           <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-emerald-100">
             <ShieldCheck className="size-4 text-emerald-300" />
@@ -82,7 +85,7 @@ export function Footer() {
       <Separator className="bg-white/10" />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-emerald-50/60 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <p>© 2026 Mulch Movers. All rights reserved.</p>
-        <p>Local supplier sourcing. Delivery estimates are mock values for now.</p>
+        <p>Online estimates include material, service, debris, and schedule capacity.</p>
       </div>
     </footer>
   );

@@ -13,8 +13,12 @@ export default function ShopPage() {
             Browse mulch, stone, sand, and soil.
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-emerald-950/65">
-            Add materials to your cart and use the delivery estimate to get a
-            quick mock quote for Metro Detroit delivery.
+            Add materials to your cart for a quick estimate. Online order limits
+            are 5 cubic yards for mulch and 2 cubic yards for soil, sand, or stone.
+          </p>
+          <p className="mt-3 text-base leading-7 text-emerald-950/65">
+            Need help choosing material, prep, or installation? Use the guided
+            help page to build a configuration and add it to your cart.
           </p>
         </div>
         <div className="mt-6">

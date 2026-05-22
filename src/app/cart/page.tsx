@@ -11,8 +11,8 @@ export default function CartRoutePage() {
           Review your materials.
         </h1>
         <p className="mt-4 text-base leading-7 text-emerald-950/65">
-          Adjust quantities, remove items, and review the estimated delivery fee
-          before requesting a delivery slot.
+          Adjust quantities, remove items, and review selected services before
+          checkout collects delivery, scheduling, and payment details.
         </p>
       </div>
       <CartPage />

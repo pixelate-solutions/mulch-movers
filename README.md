@@ -16,6 +16,21 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Address Autocomplete
+
+The shop, checkout, help, and contact address fields use an OpenStreetMap-backed
+autocomplete. By default they query Photon. You can override the endpoint with a
+Nominatim-compatible service:
+
+```bash
+NEXT_PUBLIC_OSM_GEOCODER_ENDPOINT=https://your-geocoder.example.com/search
+```
+
+Do not point client-side type-ahead traffic at the public
+`nominatim.openstreetmap.org` endpoint. The public Nominatim policy forbids
+client-side autocomplete; use a self-hosted Nominatim instance or a compliant
+OpenStreetMap geocoding provider.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

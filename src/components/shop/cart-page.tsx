@@ -1,27 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag, Trash2, Truck } from "lucide-react";
+import Image from "next/image";
+import { ClipboardList, Minus, Plus, ShoppingBag, Trash2, Truck, Wrench } from "lucide-react";
 
 import { useCart } from "@/components/shop/cart-provider";
 import { GlassCard } from "@/components/site/glass-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { calculateDeliveryFee, formatCurrency } from "@/lib/delivery";
-import { useState } from "react";
+import { formatCurrency } from "@/lib/delivery";
+import { formatDisplayDate } from "@/lib/dates";
+import { estimateOrder, serviceOptions } from "@/lib/order-estimates";
 
 export function CartPage() {
-  const { items, itemCount, removeItem, subtotal, updateQuantity } = useCart();
-  const [address, setAddress] = useState("");
-  const deliveryFee = items.length > 0 ? calculateDeliveryFee(address, itemCount) : 0;
-  const total = subtotal + deliveryFee;
+  const {
+    items,
+    projectConfig,
+    removeItem,
+    setProjectConfig,
+    subtotal,
+    updateQuantity,
+  } = useCart();
+  const projectEstimate = projectConfig
+    ? estimateOrder({
+        address: projectConfig.address,
+        productId: projectConfig.productId,
+        quantity: projectConfig.quantity,
+        family: projectConfig.materialFamily,
+        services: projectConfig.services,
+        prepLevel: projectConfig.prepLevel,
+        debrisQuantity: projectConfig.debrisQuantity,
+      })
+    : null;
+  const serviceTotal = projectEstimate
+    ? projectEstimate.installSubtotal +
+      projectEstimate.prepSubtotal +
+      projectEstimate.debrisSubtotal
+    : 0;
+  const total = subtotal + serviceTotal;
 
-  if (items.length === 0) {
+  if (items.length === 0 && !projectConfig) {
     return (
       <GlassCard className="mx-auto max-w-2xl p-8 text-center">
-        <span className="mx-auto flex size-16 items-center justify-center rounded-[1.5rem] bg-emerald-100 text-emerald-700">
+        <span className="mx-auto flex size-16 items-center justify-center rounded-3xl bg-emerald-100 text-emerald-700">
           <ShoppingBag className="size-8" />
         </span>
         <h1 className="mt-5 text-3xl font-black text-emerald-950">
@@ -30,9 +52,14 @@ export function CartPage() {
         <p className="mt-3 text-emerald-950/65">
           Add mulch, gravel, sand, soil, or compost to start a delivery estimate.
         </p>
-        <Button asChild size="lg" className="mt-6">
-          <Link href="/shop">Shop materials</Link>
-        </Button>
+        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <Button asChild size="lg">
+            <Link href="/shop">Shop materials</Link>
+          </Button>
+          <Button asChild size="lg" variant="secondary">
+            <Link href="/help">Get help choosing</Link>
+          </Button>
+        </div>
       </GlassCard>
     );
   }
@@ -43,9 +70,15 @@ export function CartPage() {
         {items.map((item) => (
           <GlassCard key={item.product.id} className="p-4">
             <div className="grid gap-4 sm:grid-cols-[6rem_1fr_auto] sm:items-center">
-              <div
-                className={`h-24 rounded-[1.5rem] bg-gradient-to-br ${item.product.imageClassName}`}
-              />
+              <div className="relative h-24 overflow-hidden rounded-3xl">
+                <Image
+                  src={`/${item.product.id}.jpg`}
+                  alt={item.product.name}
+                  fill
+                  className="object-cover"
+                  sizes="96px"
+                />
+              </div>
               <div>
                 <Badge variant="outline">{item.product.category}</Badge>
                 <h2 className="mt-2 text-xl font-black text-emerald-950">
@@ -93,6 +126,71 @@ export function CartPage() {
             </div>
           </GlassCard>
         ))}
+        {projectConfig &&
+          projectConfig.services.map((serviceKey) => {
+            const option = serviceOptions.find((o) => o.key === serviceKey);
+            const costMap: Record<string, number> = {
+              mulchInstall: projectEstimate?.installSubtotal ?? 0,
+              sitePrep: projectEstimate?.prepSubtotal ?? 0,
+              debrisHaulAway: projectEstimate?.debrisSubtotal ?? 0,
+            };
+            const cost = costMap[serviceKey] ?? 0;
+
+            return (
+              <GlassCard key={serviceKey} className="p-4">
+                <div className="grid gap-4 sm:grid-cols-[6rem_1fr_auto] sm:items-center">
+                  <div className="flex h-24 items-center justify-center rounded-3xl bg-lime-50 text-lime-700">
+                    <Wrench className="size-8" />
+                  </div>
+                  <div>
+                    <Badge variant="secondary">Add-on service</Badge>
+                    <h2 className="mt-2 text-xl font-black text-emerald-950">
+                      {option?.label}
+                    </h2>
+                    <p className="mt-1 text-sm text-emerald-950/60">
+                      {option?.description}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 sm:flex-col sm:items-end">
+                    <p className="text-xl font-black text-emerald-950">
+                      {cost > 0 ? formatCurrency(cost) : "Included"}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setProjectConfig(null)}
+                      aria-label="Remove service add-on"
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
+                </div>
+              </GlassCard>
+            );
+          })}
+        {projectConfig && (
+          <GlassCard className="p-4">
+            <div className="flex items-start gap-3">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-lime-100 text-lime-700">
+                <ClipboardList className="size-5" />
+              </span>
+              <div>
+                <Badge variant="secondary">Project details</Badge>
+                <p className="mt-2 text-sm leading-6 text-emerald-950/62">
+                  Desired date:{" "}
+                  {projectConfig.desiredDate
+                    ? formatDisplayDate(projectConfig.desiredDate)
+                    : "Not selected"}
+                </p>
+                {projectConfig.notes && (
+                  <p className="mt-1 text-sm leading-6 text-emerald-950/62">
+                    Notes: {projectConfig.notes}
+                  </p>
+                )}
+              </div>
+            </div>
+          </GlassCard>
+        )}
       </div>
 
       <GlassCard className="h-fit p-6 lg:sticky lg:top-28">
@@ -102,19 +200,12 @@ export function CartPage() {
           </span>
           <div>
             <h2 className="text-2xl font-black text-emerald-950">Delivery quote</h2>
-            <p className="mt-1 text-sm leading-6 text-emerald-950/62">
-              Mock estimate based on item count and address.
+        <p className="mt-1 text-sm leading-6 text-emerald-950/62">
+              Review items here. Checkout will confirm address, delivery fee,
+              schedule, and payment.
             </p>
           </div>
         </div>
-        <label className="mt-5 grid gap-2 text-sm font-bold text-emerald-950">
-          Delivery address
-          <Input
-            value={address}
-            onChange={(event) => setAddress(event.target.value)}
-            placeholder="Enter delivery address"
-          />
-        </label>
         <Separator className="my-5" />
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
@@ -124,19 +215,25 @@ export function CartPage() {
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-emerald-950/62">Estimated delivery</span>
-            <span className="font-black text-emerald-950">
-              {formatCurrency(deliveryFee)}
-            </span>
+            <span className="text-emerald-950/62">Delivery</span>
+            <span className="font-black text-emerald-950">Calculated at checkout</span>
           </div>
+          {serviceTotal > 0 && (
+            <div className="flex justify-between">
+              <span className="text-emerald-950/62">Selected services</span>
+              <span className="font-black text-emerald-950">
+                {formatCurrency(serviceTotal)}
+              </span>
+            </div>
+          )}
         </div>
         <Separator className="my-5" />
         <div className="flex items-center justify-between text-xl font-black text-emerald-950">
           <span>Estimated total</span>
           <span>{formatCurrency(total)}</span>
         </div>
-        <Button size="lg" className="mt-6 w-full">
-          Request delivery slot
+        <Button asChild size="lg" className="mt-6 w-full">
+          <Link href="/checkout">Proceed to checkout</Link>
         </Button>
         <Button asChild variant="secondary" size="lg" className="mt-3 w-full">
           <Link href="/shop">Keep shopping</Link>

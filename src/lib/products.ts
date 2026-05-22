@@ -1,5 +1,12 @@
 import type { Product } from "@/types/product";
 
+export const categoryQuantityLimits = {
+  Mulch: 5,
+  Stone: 2,
+  Sand: 2,
+  Soil: 2,
+} as const;
+
 export const products: Product[] = [
   {
     id: "brown-mulch",
@@ -7,8 +14,9 @@ export const products: Product[] = [
     category: "Mulch",
     startingPrice: 38,
     unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Mulch,
     description: "A clean, rich brown finish for beds, trees, and curb appeal refreshes.",
-    availability: "Fastest delivery",
+    availability: "In stock",
     imageClassName: "from-amber-950 via-stone-700 to-lime-900",
   },
   {
@@ -17,6 +25,7 @@ export const products: Product[] = [
     category: "Mulch",
     startingPrice: 42,
     unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Mulch,
     description: "Deep contrast mulch for modern landscaping and crisp garden edges.",
     availability: "In stock",
     imageClassName: "from-neutral-950 via-stone-800 to-emerald-950",
@@ -27,19 +36,43 @@ export const products: Product[] = [
     category: "Mulch",
     startingPrice: 41,
     unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Mulch,
     description: "Warm red mulch that brings bold color to front yards and walkways.",
-    availability: "Limited today",
+    availability: "In stock",
     imageClassName: "from-red-950 via-orange-800 to-stone-700",
   },
   {
     id: "natural-mulch",
-    name: "Natural Mulch",
+    name: "Natural Hardwood Mulch",
     category: "Mulch",
     startingPrice: 34,
     unit: "cubic yard",
-    description: "Undyed natural hardwood mulch with a classic, organic look.",
+    maxCubicYards: categoryQuantityLimits.Mulch,
+    description: "Undyed hardwood mulch with a classic, organic look.",
     availability: "In stock",
     imageClassName: "from-yellow-950 via-stone-700 to-green-900",
+  },
+  {
+    id: "cedar-mulch",
+    name: "Cedar Mulch",
+    category: "Mulch",
+    startingPrice: 46,
+    unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Mulch,
+    description: "Aromatic natural mulch with a lighter tone for premium beds.",
+    availability: "In stock",
+    imageClassName: "from-orange-900 via-amber-700 to-stone-600",
+  },
+  {
+    id: "arborist-mulch",
+    name: "Arborist Mulch",
+    category: "Mulch",
+    startingPrice: 28,
+    unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Mulch,
+    description: "Budget-friendly mixed wood chips for utility and natural areas.",
+    availability: "In stock",
+    imageClassName: "from-stone-800 via-yellow-900 to-lime-900",
   },
   {
     id: "pea-gravel",
@@ -47,6 +80,7 @@ export const products: Product[] = [
     category: "Stone",
     startingPrice: 56,
     unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Stone,
     description: "Rounded decorative stone for paths, drainage, patios, and play areas.",
     availability: "In stock",
     imageClassName: "from-stone-500 via-zinc-300 to-emerald-800",
@@ -57,8 +91,9 @@ export const products: Product[] = [
     category: "Stone",
     startingPrice: 61,
     unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Stone,
     description: "Compactable aggregate for driveways, bases, drainage, and utility areas.",
-    availability: "Fastest delivery",
+    availability: "In stock",
     imageClassName: "from-slate-300 via-stone-500 to-zinc-700",
   },
   {
@@ -67,6 +102,7 @@ export const products: Product[] = [
     category: "Sand",
     startingPrice: 49,
     unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Sand,
     description: "Fine screened sand for pavers, leveling, masonry, and play spaces.",
     availability: "In stock",
     imageClassName: "from-yellow-200 via-amber-400 to-stone-600",
@@ -77,8 +113,9 @@ export const products: Product[] = [
     category: "Soil",
     startingPrice: 45,
     unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Soil,
     description: "Screened topsoil for grading, lawn repairs, planters, and new beds.",
-    availability: "Fastest delivery",
+    availability: "In stock",
     imageClassName: "from-stone-950 via-amber-900 to-green-800",
   },
   {
@@ -87,12 +124,17 @@ export const products: Product[] = [
     category: "Soil",
     startingPrice: 52,
     unit: "cubic yard",
+    maxCubicYards: categoryQuantityLimits.Soil,
     description: "Nutrient-rich organic compost for gardens, soil building, and amendments.",
-    availability: "Limited today",
+    availability: "In stock",
     imageClassName: "from-zinc-950 via-stone-800 to-lime-800",
   },
 ];
 
 export function getProduct(productId: string) {
   return products.find((product) => product.id === productId);
+}
+
+export function getCategoryLimit(category: Product["category"]) {
+  return categoryQuantityLimits[category];
 }

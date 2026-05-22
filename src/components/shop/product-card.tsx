@@ -1,13 +1,13 @@
 "use client";
 
-import { Calculator, Minus, Plus, Truck } from "lucide-react";
+import { Calculator, Minus, Plus } from "lucide-react";
+import Image from "next/image";
 
 import { useCart } from "@/components/shop/cart-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/delivery";
-import { cn } from "@/lib/utils";
 import type { Product } from "@/types/product";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -17,13 +17,15 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <Card className="group overflow-hidden transition duration-200 hover:-translate-y-1 hover:cursor-pointer hover:shadow-2xl">
-      <div
-        className={cn(
-          "relative h-44 bg-gradient-to-br",
-          product.imageClassName,
-        )}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_24%,rgba(255,255,255,0.34),transparent_18%),radial-gradient(circle_at_78%_36%,rgba(255,255,255,0.18),transparent_22%),linear-gradient(to_top,rgba(6,78,59,0.42),transparent)]" />
+      <div className="relative h-44 overflow-hidden">
+        <Image
+          src={`/${product.id}.jpg`}
+          alt={product.name}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,78,59,0.42),transparent)]" />
         <Badge className="absolute left-4 top-4" variant="outline">
           {product.availability}
         </Badge>
@@ -48,7 +50,11 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="min-h-12 text-sm leading-6 text-emerald-950/62">
           {product.description}
         </p>
-        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+        <p className="mt-3 rounded-2xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800">
+          Online orders up to {product.maxCubicYards} cubic yards per{" "}
+          {product.category.toLowerCase()} load.
+        </p>
+        <div className="mt-5">
           {quantity > 0 ? (
             <div className="flex h-11 w-full items-center justify-between rounded-full bg-emerald-600 p-1 text-white shadow-lg shadow-emerald-900/15">
               <button
@@ -59,12 +65,13 @@ export function ProductCard({ product }: { product: Product }) {
               >
                 <Minus className="size-4" />
               </button>
-              <span className="min-w-12 text-center text-sm font-black">
-                {quantity}
+              <span className="min-w-16 text-center text-sm font-black">
+                {quantity} yds
               </span>
               <button
                 type="button"
                 onClick={() => updateQuantity(product.id, quantity + 1)}
+                disabled={quantity >= product.maxCubicYards}
                 className="flex size-9 items-center justify-center rounded-full transition hover:cursor-pointer hover:bg-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
                 aria-label={`Increase ${product.name} quantity`}
               >
@@ -77,17 +84,13 @@ export function ProductCard({ product }: { product: Product }) {
               Add to Cart
             </Button>
           )}
-          <Button variant="secondary" className="w-full">
-            <Truck />
-            Estimate
-          </Button>
         </div>
         <a
           href="/calculator"
           className="mt-4 flex items-center justify-center gap-2 rounded-full py-2 text-sm font-bold text-emerald-700 transition hover:cursor-pointer hover:bg-emerald-50 hover:text-emerald-900"
         >
           <Calculator className="size-4" />
-          Get Delivery Estimate
+          Estimate Material
         </a>
       </CardContent>
     </Card>

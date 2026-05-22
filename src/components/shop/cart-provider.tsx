@@ -10,8 +10,13 @@ import {
   type ReactNode,
 } from "react";
 
-import { getCartQuantity, getCartSubtotal } from "@/lib/delivery";
-import { getProduct } from "@/lib/products";
+import {
+  getCartQuantity,
+  getCartSubtotal,
+  type GeocodedAddress,
+} from "@/lib/delivery";
+import type { CartProjectConfiguration } from "@/lib/order-estimates";
+import { getCategoryLimit, getProduct } from "@/lib/products";
 import type { CartItem, Product } from "@/types/product";
 
 type StoredCartItem = {
@@ -19,11 +24,21 @@ type StoredCartItem = {
   quantity: number;
 };
 
+type StoredCart = {
+  items: StoredCartItem[];
+  projectConfig: CartProjectConfiguration | null;
+  deliveryAddress: GeocodedAddress | null;
+};
+
 type CartContextValue = {
   items: CartItem[];
+  projectConfig: CartProjectConfiguration | null;
+  deliveryAddress: GeocodedAddress | null;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  setProjectConfig: (config: CartProjectConfiguration | null) => void;
+  setDeliveryAddress: (address: GeocodedAddress | null) => void;
   clearCart: () => void;
   subtotal: number;
   itemCount: number;
@@ -36,22 +51,71 @@ function readStoredCart() {
     const storedCart = window.localStorage.getItem("mulch-movers-cart");
 
     if (!storedCart) {
-      return [];
+      return { items: [], projectConfig: null, deliveryAddress: null };
     }
 
-    const parsedCart = JSON.parse(storedCart) as StoredCartItem[];
+    const parsedCart = JSON.parse(storedCart) as StoredCart | StoredCartItem[];
+    const storedItems = Array.isArray(parsedCart)
+      ? parsedCart
+      : parsedCart.items;
+    const projectConfig = Array.isArray(parsedCart)
+      ? null
+      : parsedCart.projectConfig;
+    const deliveryAddress = Array.isArray(parsedCart)
+      ? null
+      : parsedCart.deliveryAddress;
 
-    return parsedCart.flatMap((item) => {
-      const product = getProduct(item.productId);
-      return product ? [{ product, quantity: item.quantity }] : [];
-    });
+    return {
+      items: storedItems.flatMap((item) => {
+        const product = getProduct(item.productId);
+        return product ? [{ product, quantity: item.quantity }] : [];
+      }),
+      projectConfig,
+      deliveryAddress,
+    };
   } catch {
-    return [];
+    return { items: [], projectConfig: null, deliveryAddress: null };
   }
+}
+
+function getOtherCategoryQuantity(
+  items: CartItem[],
+  product: Product,
+  productIdToIgnore?: string,
+) {
+  return items.reduce((total, item) => {
+    if (
+      item.product.category !== product.category ||
+      item.product.id === productIdToIgnore
+    ) {
+      return total;
+    }
+
+    return total + item.quantity;
+  }, 0);
+}
+
+function clampProductQuantity(
+  items: CartItem[],
+  product: Product,
+  quantity: number,
+) {
+  const categoryLimit = getCategoryLimit(product.category);
+  const otherCategoryQuantity = getOtherCategoryQuantity(
+    items,
+    product,
+    product.id,
+  );
+
+  return Math.max(0, Math.min(quantity, categoryLimit - otherCategoryQuantity));
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [projectConfig, setProjectConfig] =
+    useState<CartProjectConfiguration | null>(null);
+  const [deliveryAddress, setDeliveryAddress] =
+    useState<GeocodedAddress | null>(null);
   const hasLoadedCart = useRef(false);
 
   useEffect(() => {
@@ -60,7 +124,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     window.requestAnimationFrame(() => {
-      setItems(readStoredCart());
+      const storedCart = readStoredCart();
+      setItems(storedCart.items);
+      setProjectConfig(storedCart.projectConfig);
+      setDeliveryAddress(storedCart.deliveryAddress);
       hasLoadedCart.current = true;
     });
   }, []);
@@ -70,17 +137,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const storedItems: StoredCartItem[] = items.map((item) => ({
-      productId: item.product.id,
-      quantity: item.quantity,
-    }));
+    const storedCart: StoredCart = {
+      items: items.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+      projectConfig,
+      deliveryAddress,
+    };
 
-    window.localStorage.setItem("mulch-movers-cart", JSON.stringify(storedItems));
-  }, [items]);
+    window.localStorage.setItem("mulch-movers-cart", JSON.stringify(storedCart));
+  }, [deliveryAddress, items, projectConfig]);
 
   const value = useMemo<CartContextValue>(
     () => ({
       items,
+      projectConfig,
+      deliveryAddress,
       addItem: (product, quantity = 1) => {
         setItems((currentItems) => {
           const existingItem = currentItems.find(
@@ -88,14 +161,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
           );
 
           if (existingItem) {
+            const safeQuantity = clampProductQuantity(
+              currentItems,
+              product,
+              existingItem.quantity + quantity,
+            );
+
             return currentItems.map((item) =>
               item.product.id === product.id
-                ? { ...item, quantity: item.quantity + quantity }
+                ? { ...item, quantity: safeQuantity }
                 : item,
             );
           }
 
-          return [...currentItems, { product, quantity }];
+          const safeQuantity = clampProductQuantity(
+            currentItems,
+            product,
+            quantity,
+          );
+
+          if (safeQuantity <= 0) {
+            return currentItems;
+          }
+
+          return [...currentItems, { product, quantity: safeQuantity }];
         });
       },
       removeItem: (productId) => {
@@ -105,20 +194,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
       },
       updateQuantity: (productId, quantity) => {
         setItems((currentItems) =>
-          currentItems.flatMap((item) =>
-            item.product.id === productId
-              ? quantity > 0
-                ? [{ ...item, quantity }]
-                : []
-              : [item],
-          ),
+          currentItems.flatMap((item) => {
+            if (item.product.id !== productId) {
+              return [item];
+            }
+
+            const safeQuantity = clampProductQuantity(
+              currentItems,
+              item.product,
+              quantity,
+            );
+
+            return safeQuantity > 0 ? [{ ...item, quantity: safeQuantity }] : [];
+          }),
         );
       },
-      clearCart: () => setItems([]),
+      setProjectConfig,
+      setDeliveryAddress,
+      clearCart: () => {
+        setItems([]);
+        setProjectConfig(null);
+        setDeliveryAddress(null);
+      },
       subtotal: getCartSubtotal(items),
       itemCount: getCartQuantity(items),
     }),
-    [items],
+    [deliveryAddress, items, projectConfig],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

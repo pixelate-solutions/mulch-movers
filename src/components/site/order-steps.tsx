@@ -1,27 +1,32 @@
-import { CalendarDays, MapPinned, Ruler, Truck } from "lucide-react";
+import { CalendarDays, ClipboardCheck, MapPinned, Ruler, Truck } from "lucide-react";
 
 import { GlassCard } from "@/components/site/glass-card";
 
 const steps = [
   {
-    title: "Tell us where",
+    title: "Project details",
     text: "Enter your address",
     icon: MapPinned,
   },
   {
-    title: "Tell us what material",
-    text: "Choose mulch, gravel, sand, soil, etc.",
+    title: "Material and services",
+    text: "Choose delivery, installation, prep, or haul away.",
     icon: Truck,
   },
   {
-    title: "Tell us how much",
-    text: "Enter quantity or use the calculator",
+    title: "Quantity limits",
+    text: "Mulch up to 5 CY. Soil, sand, stone, and debris up to 2 CY.",
     icon: Ruler,
   },
   {
-    title: "Tell us when",
-    text: "Pick your preferred delivery date/time",
+    title: "Schedule fit",
+    text: "Pick from available hours and service windows.",
     icon: CalendarDays,
+  },
+  {
+    title: "Place order",
+    text: "Review automated pricing and submit online.",
+    icon: ClipboardCheck,
   },
 ];
 
@@ -33,10 +38,10 @@ export function OrderSteps() {
           Easy ordering
         </p>
         <h2 className="mt-3 text-3xl font-black tracking-tight text-emerald-950 sm:text-4xl">
-          Four steps from project idea to driveway drop.
+          From project idea to priced order without a call.
         </h2>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {steps.map((step, index) => (
           <GlassCard
             key={step.title}

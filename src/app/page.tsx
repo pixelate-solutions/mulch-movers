@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BadgeDollarSign, Boxes, MapPinned, Sparkles } from "lucide-react";
+import { ArrowRight, BadgeDollarSign, Leaf, Sparkles, Truck } from "lucide-react";
 
 import { HeroSection } from "@/components/site/hero-section";
 import { OrderSteps } from "@/components/site/order-steps";
@@ -15,19 +15,19 @@ export default function Home() {
         <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.22em] text-emerald-700">
-              Built for busy projects
+              Services offered
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-tight text-emerald-950 sm:text-4xl">
-              We find the best supplier fit, not just the nearest pile.
+              Delivery, installation, prep, and cleanup in one order flow.
             </h2>
             <p className="mt-4 text-base leading-7 text-emerald-950/65">
-              Mulch Movers does not own inventory. We compare local supplier
-              options for price, availability, speed, and delivery location, then
-              help coordinate the drop.
+              The site guides customers through material choice, quantity,
+              project readiness, haul away needs, and calendar availability so
+              pricing and scheduling can happen online.
             </p>
             <Button asChild size="lg" className="mt-7">
               <Link href="/shop">
-                Browse materials
+                Shop materials
                 <ArrowRight />
               </Link>
             </Button>
@@ -35,23 +35,23 @@ export default function Home() {
           <div className="grid gap-4 sm:grid-cols-2">
             {[
               {
-                title: "Local sourcing",
-                text: "Multiple trusted landscaping suppliers across Metro Detroit.",
-                icon: MapPinned,
+                title: "Material purchase and delivery",
+                text: "Supplier sourcing, delivery pricing, and order timing for small residential loads.",
+                icon: Truck,
               },
               {
-                title: "Material coverage",
-                text: "Mulch, gravel, limestone, sand, topsoil, compost, and more.",
-                icon: Boxes,
+                title: "Material installation",
+                text: "Mulch spreading when beds are ready for installation.",
+                icon: Leaf,
               },
               {
-                title: "Smart estimates",
-                text: "Mock cart totals show material subtotal and estimated delivery.",
+                title: "Project site preparation",
+                text: "Light or heavy prep selections for edging, weeding, trimming, and removal.",
                 icon: BadgeDollarSign,
               },
               {
-                title: "Polished ordering",
-                text: "Simple steps for address, material, quantity, and timing.",
+                title: "Yard debris haul away",
+                text: "Cleanup and haul away for shrubs, sticks, leaves, and small branches.",
                 icon: Sparkles,
               },
             ].map((feature) => (
@@ -78,8 +78,8 @@ export default function Home() {
                 Ready to price your next delivery?
               </h2>
               <p className="mt-3 max-w-2xl text-emerald-50/75">
-                Use the calculator, add materials to the cart, and send a request
-                when you know where and when you need it.
+                Use the automated order flow to price materials, services,
+                project prep, debris cleanup, and available schedule windows.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -87,7 +87,7 @@ export default function Home() {
                 <Link href="/calculator">Calculate quantity</Link>
               </Button>
               <Button asChild size="lg" className="bg-lime-400 text-emerald-950 hover:bg-lime-300">
-                <Link href="/contact">Contact us</Link>
+                <Link href="/help">Help me choose</Link>
               </Button>
             </div>
           </div>

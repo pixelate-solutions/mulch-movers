@@ -8,11 +8,11 @@ export default function ContactPage() {
           Contact Mulch Movers
         </p>
         <h1 className="mt-3 text-4xl font-black tracking-tight text-emerald-950 sm:text-5xl">
-          Get help placing an order.
+          Get help after using the online order flow.
         </h1>
         <p className="mt-4 text-base leading-7 text-emerald-950/65">
-          Tell us what material you need, where it is going, and when you want it
-          delivered. We will help sort through supplier options.
+          Pricing, estimating, and scheduling now start in the shop and checkout flow. Use
+          this form only for unusual access, custom requests, or questions.
         </p>
       </div>
       <ContactForm />
