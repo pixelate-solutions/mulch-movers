@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, Phone, Send } from "lucide-react";
+import { type FormEvent, useState } from "react";
+import { CheckCircle2, Mail, Phone, Send } from "lucide-react";
 
 import { AddressAutocomplete } from "@/components/shop/address-autocomplete";
 import { GlassCard } from "@/components/site/glass-card";
@@ -15,10 +15,86 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { formatPhoneInput, isValidUsPhone, phonePattern } from "@/lib/phone";
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const materialOptions = [
+  { label: "Mulch", value: "mulch" },
+  { label: "Gravel", value: "gravel" },
+  { label: "Sand", value: "sand" },
+  { label: "Soil", value: "soil" },
+  { label: "Other material", value: "other" },
+];
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [material, setMaterial] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [addressInputKey, setAddressInputKey] = useState(0);
+  const [message, setMessage] = useState("");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!name.trim()) {
+      setError("Enter your name.");
+      return;
+    }
+
+    if (!emailPattern.test(email.trim())) {
+      setError("Enter a valid email address.");
+      return;
+    }
+
+    if (!isValidUsPhone(phone)) {
+      setError("Enter a valid 10-digit U.S. phone number.");
+      return;
+    }
+
+    setError("");
+    setSubmitted(false);
+    setSubmitting(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          phone,
+          material,
+          deliveryAddress,
+          message: message.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        setError(body.error ?? "Failed to send request. Please try again.");
+        return;
+      }
+
+      setSubmitted(true);
+      setName("");
+      setEmail("");
+      setPhone("");
+      setMaterial("");
+      setDeliveryAddress("");
+      setAddressInputKey((currentKey) => currentKey + 1);
+      setMessage("");
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
@@ -52,23 +128,36 @@ export function ContactForm() {
       </GlassCard>
 
       <GlassCard className="p-6">
-        <form
-          className="grid gap-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setSubmitted(true);
-          }}
-        >
+        <form className="grid gap-4" onSubmit={handleSubmit}>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
               Name
-              <Input required placeholder="Your name" />
+              <Input
+                required
+                name="name"
+                autoComplete="name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Your name"
+              />
             </label>
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
               Email
               <Input
                 required
+                name="email"
                 type="email"
+                inputMode="email"
+                autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                maxLength={254}
+                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value.replace(/\s/g, "").toLowerCase())
+                }
                 placeholder="you@example.com"
                 title="Enter a valid email address."
               />
@@ -78,25 +167,31 @@ export function ContactForm() {
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
               Phone
               <Input
+                required
+                name="phone"
                 type="tel"
-                inputMode="tel"
-                pattern="^\\+?1?[-.\\s]?\\(?[2-9]\\d{2}\\)?[-.\\s]?\\d{3}[-.\\s]?\\d{4}$"
+                inputMode="numeric"
+                autoComplete="tel"
+                maxLength={14}
+                pattern={phonePattern}
+                value={phone}
+                onChange={(event) => setPhone(formatPhoneInput(event.target.value))}
                 placeholder="(248) 555-0123"
                 title="Enter a valid 10-digit U.S. phone number."
               />
             </label>
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
               Material needed
-              <Select>
+              <Select value={material} onValueChange={setMaterial}>
                 <SelectTrigger>
                   <SelectValue placeholder="Choose material" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mulch">Mulch</SelectItem>
-                  <SelectItem value="gravel">Gravel</SelectItem>
-                  <SelectItem value="sand">Sand</SelectItem>
-                  <SelectItem value="soil">Soil</SelectItem>
-                  <SelectItem value="other">Other material</SelectItem>
+                  {materialOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </label>
@@ -104,6 +199,7 @@ export function ContactForm() {
           <label className="grid gap-2 text-sm font-bold text-emerald-950">
             Delivery address
             <AddressAutocomplete
+              key={addressInputKey}
               onInputChange={() => setDeliveryAddress("")}
               onSelect={(address) => setDeliveryAddress(address.label)}
             />
@@ -111,16 +207,32 @@ export function ContactForm() {
           </label>
           <label className="grid gap-2 text-sm font-bold text-emerald-950">
             Message
-            <Textarea placeholder="Tell us about timing, placement, material, and quantity." />
+            <Textarea
+              name="message"
+              value={message}
+              onChange={(event) => setMessage(event.target.value)}
+              placeholder="Tell us about timing, placement, material, and quantity."
+            />
           </label>
-          {submitted && (
-            <div className="rounded-2xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-800">
-              Thanks. Your request has been captured in this prototype.
+          {error && (
+            <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+              {error}
             </div>
           )}
-          <Button type="submit" size="lg" className="mx-auto w-full sm:w-fit">
+          {submitted && (
+            <div className="rounded-2xl bg-emerald-100 px-4 py-3 text-sm font-semibold text-emerald-800">
+              <CheckCircle2 className="mr-2 inline size-4" />
+              Thanks. Your request has been sent.
+            </div>
+          )}
+          <Button
+            type="submit"
+            size="lg"
+            className="mx-auto w-full sm:w-fit"
+            disabled={submitting}
+          >
             <Send />
-            Send request
+            {submitting ? "Sending..." : "Send request"}
           </Button>
         </form>
       </GlassCard>

@@ -1,5 +1,7 @@
 import { Resend } from "resend";
 
+import { adminEmail, resendFromEmail } from "@/lib/email";
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export type OrderPayload = {
@@ -146,13 +148,13 @@ export async function POST(request: Request) {
 
   const [adminResult, customerResult] = await Promise.all([
     resend.emails.send({
-      from: "Mulch Movers <orders@mulchmovers.com>",
-      to: "admin@pixelate.solutions",
+      from: resendFromEmail,
+      to: adminEmail,
       subject: `New order — ${order.firstName} ${order.lastName} — ${order.deliveryDate}`,
       html: buildAdminHtml(order),
     }),
     resend.emails.send({
-      from: "Mulch Movers <orders@mulchmovers.com>",
+      from: resendFromEmail,
       to: order.email,
       subject: "Your Mulch Movers order is confirmed",
       html: buildConfirmationHtml(order),

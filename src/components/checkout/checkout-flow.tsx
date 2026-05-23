@@ -32,13 +32,9 @@ import {
 } from "@/lib/delivery";
 import { localDateValue } from "@/lib/dates";
 import { estimateOrder, scheduleDays, serviceOptions } from "@/lib/order-estimates";
+import { formatPhoneInput, isValidUsPhone, phonePattern } from "@/lib/phone";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function isValidPhone(value: string) {
-  const digits = value.replace(/\D/g, "");
-  return digits.length === 10;
-}
 
 export function CheckoutFlow() {
   const {
@@ -165,13 +161,12 @@ export function CheckoutFlow() {
                 required
                 type="tel"
                 inputMode="numeric"
+                autoComplete="tel"
                 value={phone}
-                onChange={(event) =>
-                  setPhone(event.target.value.replace(/\D/g, "").slice(0, 10))
-                }
-                pattern="\\d{10}"
-                maxLength={10}
-                placeholder="2485550123"
+                onChange={(event) => setPhone(formatPhoneInput(event.target.value))}
+                pattern={phonePattern}
+                maxLength={14}
+                placeholder="(248) 555-0123"
                 title="Enter a valid 10-digit U.S. phone number."
               />
             </label>
@@ -338,7 +333,7 @@ export function CheckoutFlow() {
               setError("Enter a valid email address.");
               return;
             }
-            if (!isValidPhone(phone)) {
+            if (!isValidUsPhone(phone)) {
               setError("Enter a valid 10-digit U.S. phone number.");
               return;
             }
