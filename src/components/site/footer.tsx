@@ -61,7 +61,7 @@ export function Footer() {
             </p>
             <p className="flex items-center gap-3">
               <Mail className="size-4 text-emerald-300" />
-              orders@mulchmovers.com
+              info@movingmulch.com
             </p>
           </div>
         </div>

@@ -121,7 +121,7 @@ export function ContactForm() {
             </span>
             <div>
               <p className="text-sm font-bold text-lime-700">Email</p>
-              <p className="font-black text-emerald-950">orders@mulchmovers.com</p>
+              <p className="font-black text-emerald-950">info@movingmulch.com</p>
             </div>
           </div>
         </div>

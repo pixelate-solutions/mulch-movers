@@ -2,9 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgeDollarSign,
-  CircleHelp,
   Leaf,
-  PackageCheck,
   Sparkles,
   Truck,
 } from "lucide-react";
@@ -18,52 +16,6 @@ export default function Home() {
   return (
     <>
       <HeroSection />
-      <section className="mx-auto w-full max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
-        <div className="grid gap-4 rounded-[2rem] border border-emerald-900/10 bg-white/80 p-4 shadow-xl shadow-emerald-950/10 backdrop-blur md:grid-cols-2 md:p-5">
-          <div className="flex flex-col gap-4 rounded-[1.5rem] bg-emerald-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white">
-                <PackageCheck className="size-5" />
-              </span>
-              <div>
-                <p className="text-lg font-black text-emerald-950">
-                  I know what I need
-                </p>
-                <p className="mt-1 text-sm leading-6 text-emerald-950/62">
-                  Browse materials and add cubic yards to your cart.
-                </p>
-              </div>
-            </div>
-            <Button asChild size="lg" className="shrink-0">
-              <Link href="/shop">
-                Shop materials
-                <ArrowRight />
-              </Link>
-            </Button>
-          </div>
-          <div className="flex flex-col gap-4 rounded-[1.5rem] bg-lime-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-lime-600 text-white">
-                <CircleHelp className="size-5" />
-              </span>
-              <div>
-                <p className="text-lg font-black text-emerald-950">
-                  I need some guidance
-                </p>
-                <p className="mt-1 text-sm leading-6 text-emerald-950/62">
-                  Answer a few questions and build the order step by step.
-                </p>
-              </div>
-            </div>
-            <Button asChild size="lg" variant="secondary" className="shrink-0">
-              <Link href="/help">
-                Help me choose
-                <ArrowRight />
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
       <OrderSteps />
       <section className="bg-white/65 py-16">
         <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">

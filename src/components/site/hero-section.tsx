@@ -1,22 +1,14 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  CalendarClock,
-  MapPin,
+  CircleHelp,
   PackageCheck,
-  ShieldCheck,
   Truck,
 } from "lucide-react";
 
 import { GlassCard } from "@/components/site/glass-card";
 import { HeroAddressEstimate } from "@/components/site/hero-address-estimate";
 import { Button } from "@/components/ui/button";
-
-const supplierSignals = [
-  { label: "Mulch orders", value: "Up to 5 CY", icon: PackageCheck },
-  { label: "Soil, sand, stone", value: "Up to 2 CY", icon: MapPin },
-  { label: "Open schedule", value: "Live slots", icon: CalendarClock },
-];
 
 export function HeroSection() {
   return (
@@ -42,47 +34,51 @@ export function HeroSection() {
               Serving the Metro Detroit area
             </span>
           </div>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/shop">
-                Shop Materials
-                <ArrowRight />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="secondary">
-              <Link href="/help">Help Me Choose</Link>
-            </Button>
-          </div>
         </div>
 
         <GlassCard className="relative mx-auto w-full max-w-xl p-4 sm:p-5">
-          <div className="overflow-hidden rounded-[1.55rem] bg-gradient-to-br from-emerald-800 via-lime-700 to-stone-700 p-5 text-white shadow-2xl shadow-emerald-950/25">
-            <div className="grid min-h-80 content-between rounded-[1.25rem] border border-white/20 bg-[linear-gradient(135deg,rgba(255,255,255,0.24),rgba(255,255,255,0.04)),radial-gradient(circle_at_15%_20%,rgba(255,255,255,0.28),transparent_16%),radial-gradient(circle_at_80%_15%,rgba(255,255,255,0.18),transparent_22%)] p-5 backdrop-blur">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-white/75">Live sourcing</p>
-                  <p className="text-2xl font-black">Order automation</p>
-                </div>
-                <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-bold">
-                  Same site
+          <div className="grid gap-4">
+            <div className="flex flex-col gap-4 rounded-[1.5rem] bg-emerald-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white">
+                  <PackageCheck className="size-5" />
                 </span>
+                <div>
+                  <p className="text-lg font-black text-emerald-950">
+                    I know what I need
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-emerald-950/62">
+                    Browse materials and add cubic yards to your cart.
+                  </p>
+                </div>
               </div>
-              <div className="grid gap-3">
-                {supplierSignals.map(({ label, value, icon: Icon }) => (
-                  <div
-                    key={label}
-                    className="flex items-center justify-between rounded-2xl border border-white/20 bg-white/16 p-4 backdrop-blur"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-10 items-center justify-center rounded-full bg-white/20">
-                        <Icon className="size-5" />
-                      </span>
-                      <span className="font-semibold">{label}</span>
-                    </div>
-                    <span className="font-black">{value}</span>
-                  </div>
-                ))}
+              <Button asChild size="lg" className="shrink-0">
+                <Link href="/shop">
+                  Shop materials
+                  <ArrowRight />
+                </Link>
+              </Button>
+            </div>
+            <div className="flex flex-col gap-4 rounded-[1.5rem] bg-lime-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-lime-600 text-white">
+                  <CircleHelp className="size-5" />
+                </span>
+                <div>
+                  <p className="text-lg font-black text-emerald-950">
+                    I need some guidance
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-emerald-950/62">
+                    Answer a few questions and build the order step by step.
+                  </p>
+                </div>
               </div>
+              <Button asChild size="lg" variant="secondary" className="shrink-0">
+                <Link href="/help">
+                  Help me choose
+                  <ArrowRight />
+                </Link>
+              </Button>
             </div>
           </div>
           <HeroAddressEstimate />

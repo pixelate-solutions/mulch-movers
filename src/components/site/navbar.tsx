@@ -55,10 +55,10 @@ export function Navbar() {
           </span>
           <span className="leading-tight">
             <span className="block text-lg font-black tracking-tight text-emerald-950">
-              Mulch Movers
+              Mulch Movers LLC
             </span>
             <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
-              Veteran Owned
+              We mulch. You enjoy.
             </span>
           </span>
         </Link>

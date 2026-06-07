@@ -1,4 +1,4 @@
-import { CalendarDays, ClipboardCheck, MapPinned, Ruler, Truck } from "lucide-react";
+import { CalendarDays, ClipboardCheck, MapPinned, Truck } from "lucide-react";
 
 import { GlassCard } from "@/components/site/glass-card";
 
@@ -12,11 +12,6 @@ const steps = [
     title: "Material and services",
     text: "Choose delivery, installation, prep, or haul away.",
     icon: Truck,
-  },
-  {
-    title: "Quantity limits",
-    text: "Mulch up to 5 CY. Soil, sand, stone, and debris up to 2 CY.",
-    icon: Ruler,
   },
   {
     title: "Schedule fit",
@@ -33,7 +28,7 @@ const steps = [
 export function OrderSteps() {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mb-8 max-w-2xl">
+      <div className="mx-auto mb-8 max-w-2xl text-center">
         <p className="text-sm font-bold uppercase tracking-[0.22em] text-emerald-700">
           Easy ordering
         </p>
@@ -41,7 +36,7 @@ export function OrderSteps() {
           From project idea to priced order without a call.
         </h2>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mx-auto grid max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {steps.map((step, index) => (
           <GlassCard
             key={step.title}
