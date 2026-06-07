@@ -25,10 +25,6 @@ export function HeroSection() {
       <div className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-white to-transparent" />
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:py-16">
         <div className="max-w-3xl">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/70 px-4 py-2 text-sm font-bold text-emerald-800 shadow-sm backdrop-blur">
-            <ShieldCheck className="size-4" />
-            Veteran owned + automated local ordering
-          </div>
           <h1 className="text-balance text-5xl font-black tracking-tight text-emerald-950 sm:text-6xl lg:text-7xl">
             Welcome to Mulch Movers LLC.
           </h1>
@@ -42,12 +38,8 @@ export function HeroSection() {
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-sm font-bold text-emerald-800">
             <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm backdrop-blur">
-              <ShieldCheck className="size-4" />
-              Veteran owned
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 shadow-sm backdrop-blur">
               <Truck className="size-4" />
-              Metro Detroit delivery
+              Serving the Metro Detroit area
             </span>
           </div>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">

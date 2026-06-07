@@ -2,7 +2,7 @@ import { products } from "@/lib/products";
 
 export type ProjectMode = "ready" | "guidance";
 export type MaterialFamily = "mulch" | "soil" | "sand" | "stone" | "debris";
-export type PrepLevel = "ready" | "light" | "heavy";
+export type PrepLevel = "ready" | "light" | "moderate" | "heavy";
 export type ServiceKey =
   | "delivery"
   | "mulchInstall"
@@ -56,6 +56,20 @@ export const serviceOptions: {
   },
 ];
 
+const prepLevelHours: Record<PrepLevel, number> = {
+  ready: 0,
+  light: 2,
+  moderate: 3,
+  heavy: 4,
+};
+
+const prepLevelPricing: Record<PrepLevel, number> = {
+  ready: 0,
+  light: 145,
+  moderate: 240,
+  heavy: 340,
+};
+
 export const scheduleDays = [
   { date: "2026-05-23", label: "Sat, May 23", openHours: 4, windows: ["8-11 AM", "12-3 PM"] },
   { date: "2026-05-25", label: "Mon, May 25", openHours: 6, windows: ["9-12 PM", "1-4 PM"] },
@@ -102,9 +116,7 @@ export function getProjectHours({
       : 0;
   const prepHours =
     services.includes("sitePrep") || prepLevel !== "ready"
-      ? prepLevel === "heavy"
-        ? 4
-        : 2
+      ? prepLevelHours[prepLevel]
       : 0;
   const debrisHours = services.includes("debrisHaulAway")
     ? Math.max(1, debrisQuantity * 0.75)
@@ -141,9 +153,7 @@ export function estimateOrder({
       : 0;
   const prepSubtotal =
     services.includes("sitePrep") || prepLevel !== "ready"
-      ? prepLevel === "heavy"
-        ? 340
-        : 145
+      ? prepLevelPricing[prepLevel]
       : 0;
   const debrisSubtotal = services.includes("debrisHaulAway")
     ? 60 + safeDebrisQuantity * 90

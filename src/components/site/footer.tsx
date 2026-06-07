@@ -20,13 +20,13 @@ export function Footer() {
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.3fr_1fr_1fr] lg:px-8">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <span className="relative size-12 overflow-hidden rounded-2xl shadow-lg shadow-black/20">
+            <span className="relative size-12 shrink-0">
               <Image
                 src="/mulch-movers-logo.png"
                 alt="Mulch Movers logo"
                 fill
                 sizes="48px"
-                className="object-cover"
+                className="object-contain drop-shadow-lg"
               />
             </span>
             <div>

@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency, type GeocodedAddress } from "@/lib/delivery";
 import { formatDisplayDate, localDateValue } from "@/lib/dates";
 import {
@@ -32,7 +31,7 @@ import {
   type PrepLevel,
   type ServiceKey,
 } from "@/lib/order-estimates";
-import { getProduct, products } from "@/lib/products";
+import { products } from "@/lib/products";
 import { cn } from "@/lib/utils";
 
 const materialOptions: {
@@ -96,18 +95,18 @@ const mulchUseCases = [
 
 const prepOptions: { value: PrepLevel; label: string; description: string }[] = [
   {
-    value: "ready",
-    label: "Ready for mulch",
-    description: "Weeded, edged, barrier installed, plants are all set.",
-  },
-  {
     value: "light",
-    label: "I need some help",
+    label: "Light prep",
     description: "Light weeding, edging, or trimming.",
   },
   {
+    value: "moderate",
+    label: "Moderate prep",
+    description: "More involved weeding, edging, cleanup, or bed shaping.",
+  },
+  {
     value: "heavy",
-    label: "I need a lot of help",
+    label: "Heavy prep",
     description: "Heavy weeding, brush cutting, debris, or old mulch removal.",
   },
 ];
@@ -133,6 +132,7 @@ export function HelpFlow() {
   const [width, setWidth] = useState("10");
   const [depth, setDepth] = useState("3");
   const [services, setServices] = useState<ServiceKey[]>([]);
+  const [prepLevel, setPrepLevel] = useState<PrepLevel | "">("");
   const [added, setAdded] = useState(false);
   const [stepError, setStepError] = useState("");
 
@@ -184,6 +184,8 @@ export function HelpFlow() {
     product || materialFamily
       ? clampMaterialQuantity(selectedFamily, parseNumber(quantity))
       : 0;
+  const activePrepLevel: PrepLevel =
+    services.includes("sitePrep") && prepLevel ? prepLevel : "ready";
   const measuredQuantity = useMemo(() => {
     const cubicYards =
       (parseNumber(length) * parseNumber(width) * (parseNumber(depth) / 12)) /
@@ -197,9 +199,14 @@ export function HelpFlow() {
     quantity: safeQuantity,
     family: selectedFamily,
     services,
-    prepLevel: "ready",
+    prepLevel: activePrepLevel,
     debrisQuantity: materialFamily === "debris" ? safeQuantity : 0,
   });
+  const serviceSubtotal =
+    estimate.installSubtotal + estimate.prepSubtotal + estimate.debrisSubtotal;
+  const selectedPrepOption = prepOptions.find(
+    (option) => option.value === prepLevel,
+  );
 
   function goNext() {
     const currentStep = visibleSteps[step];
@@ -280,6 +287,20 @@ export function HelpFlow() {
     setQuantity(value === "" ? "" : String(cappedValue));
   }
 
+  function toggleService(service: ServiceKey) {
+    setServices((current) => {
+      const next = current.includes(service)
+        ? current.filter((key) => key !== service)
+        : [...current, service];
+
+      if (service === "sitePrep" && current.includes(service)) {
+        setPrepLevel("");
+      }
+
+      return next;
+    });
+  }
+
   function getStepError(currentStep: string) {
     if (currentStep === "Project location" && !address) {
       return "Select a suggested project address before continuing.";
@@ -309,6 +330,13 @@ export function HelpFlow() {
     }
     if (currentStep === "Installation help" && services.length === 0) {
       return "Select at least one service option.";
+    }
+    if (
+      currentStep === "Installation help" &&
+      services.includes("sitePrep") &&
+      !prepLevel
+    ) {
+      return "Select a site prep level.";
     }
 
     return "";
@@ -347,7 +375,7 @@ export function HelpFlow() {
       quantity: safeQuantity,
       debrisQuantity: materialFamily === "debris" ? safeQuantity : 0,
       services,
-      prepLevel: "ready",
+      prepLevel: activePrepLevel,
       notes: "",
     });
 
@@ -400,110 +428,125 @@ export function HelpFlow() {
         )}
 
         {visibleSteps[step] === "Material need" && (
-          <div className="grid gap-3 md:grid-cols-2">
-            {materialOptions.map((option) => (
-              <label
-                key={option.value}
-                className={cn(
-                  "flex gap-3 rounded-3xl border p-4 text-left transition hover:cursor-pointer hover:-translate-y-0.5",
-                  selectedMaterialFamilies.includes(option.value)
-                    ? "border-emerald-600 bg-emerald-50"
-                    : "border-emerald-900/10 bg-white/70",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedMaterialFamilies.includes(option.value)}
-                  onChange={() => toggleMaterialFamily(option.value)}
-                  className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
-                />
-                <span>
-                  <span className="block font-black text-emerald-950">
-                    {option.label}
+          <div className="grid gap-4">
+            <p className="text-sm font-semibold text-emerald-950/55">
+              Select all that apply.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {materialOptions.map((option) => (
+                <label
+                  key={option.value}
+                  className={cn(
+                    "flex gap-3 rounded-3xl border p-4 text-left transition hover:cursor-pointer hover:-translate-y-0.5",
+                    selectedMaterialFamilies.includes(option.value)
+                      ? "border-emerald-600 bg-emerald-50"
+                      : "border-emerald-900/10 bg-white/70",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedMaterialFamilies.includes(option.value)}
+                    onChange={() => toggleMaterialFamily(option.value)}
+                    className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
+                  />
+                  <span>
+                    <span className="block font-black text-emerald-950">
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
+                      {option.description}
+                    </span>
                   </span>
-                  <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
-                    {option.description}
-                  </span>
-                </span>
-              </label>
-            ))}
+                </label>
+              ))}
+            </div>
           </div>
         )}
 
         {visibleSteps[step] === "Mulch guidance" && (
-          <div className="grid gap-3 md:grid-cols-2">
-            {mulchUseCases.map((useCase) => (
-              <label
-                key={useCase.value}
-                className={cn(
-                  "flex gap-3 rounded-3xl border p-4 text-left transition hover:cursor-pointer hover:-translate-y-0.5",
-                  selectedMulchUseCases.includes(useCase.value)
-                    ? "border-emerald-600 bg-emerald-50"
-                    : "border-emerald-900/10 bg-white/70",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedMulchUseCases.includes(useCase.value)}
-                  onChange={() => toggleMulchUseCase(useCase)}
-                  className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
-                />
-                <span>
-                  <span className="block font-black text-emerald-950">
-                    {useCase.label}
+          <div className="grid gap-4">
+            <p className="text-sm font-semibold text-emerald-950/55">
+              Select all that apply.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {mulchUseCases.map((useCase) => (
+                <label
+                  key={useCase.value}
+                  className={cn(
+                    "flex gap-3 rounded-3xl border p-4 text-left transition hover:cursor-pointer hover:-translate-y-0.5",
+                    selectedMulchUseCases.includes(useCase.value)
+                      ? "border-emerald-600 bg-emerald-50"
+                      : "border-emerald-900/10 bg-white/70",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedMulchUseCases.includes(useCase.value)}
+                    onChange={() => toggleMulchUseCase(useCase)}
+                    className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
+                  />
+                  <span>
+                    <span className="block font-black text-emerald-950">
+                      {useCase.label}
+                    </span>
+                    <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
+                      {useCase.description}
+                    </span>
                   </span>
-                  <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
-                    {useCase.description}
-                  </span>
-                </span>
-              </label>
-            ))}
+                </label>
+              ))}
+            </div>
           </div>
         )}
 
         {visibleSteps[step] === "Exact material" && (
-          <div className="grid gap-3 md:grid-cols-2">
-            {productOptions.map((option) => (
-              <label
-                key={option.id}
-                className={cn(
-                  "flex gap-3 rounded-3xl border p-4 text-left transition hover:cursor-pointer hover:-translate-y-0.5",
-                  productIds.includes(option.id)
-                    ? "border-emerald-600 bg-emerald-50"
-                    : "border-emerald-900/10 bg-white/70",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={productIds.includes(option.id)}
-                  onChange={() =>
-                    setProductIds((current) =>
-                      current.includes(option.id)
-                        ? current.filter((id) => id !== option.id)
-                        : [...current, option.id],
-                    )
-                  }
-                  className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
-                />
-                <span>
-                  <span className="block font-black text-emerald-950">
-                    {option.name}
+          <div className="grid gap-4">
+            <p className="text-sm font-semibold text-emerald-950/55">
+              Select all that apply.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {productOptions.map((option) => (
+                <label
+                  key={option.id}
+                  className={cn(
+                    "flex gap-3 rounded-3xl border p-4 text-left transition hover:cursor-pointer hover:-translate-y-0.5",
+                    productIds.includes(option.id)
+                      ? "border-emerald-600 bg-emerald-50"
+                      : "border-emerald-900/10 bg-white/70",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={productIds.includes(option.id)}
+                    onChange={() =>
+                      setProductIds((current) =>
+                        current.includes(option.id)
+                          ? current.filter((id) => id !== option.id)
+                          : [...current, option.id],
+                      )
+                    }
+                    className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
+                  />
+                  <span>
+                    <span className="block font-black text-emerald-950">
+                      {option.name}
+                    </span>
+                    <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
+                      {option.description}
+                    </span>
+                    <span className="mt-3 block text-sm font-black text-emerald-800">
+                      {formatCurrency(option.startingPrice)} / cubic yard
+                    </span>
                   </span>
-                  <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
-                    {option.description}
-                  </span>
-                  <span className="mt-3 block text-sm font-black text-emerald-800">
-                    {formatCurrency(option.startingPrice)} / cubic yard
-                  </span>
-                </span>
-              </label>
-            ))}
-            {productOptions.length === 0 && (
-              <div className="rounded-3xl bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-800">
-                Select mulch, soil, sand, or stone in the previous step so
-                there is a shop product to add to the cart.
-              </div>
-            )}
+                </label>
+              ))}
+              {productOptions.length === 0 && (
+                <div className="rounded-3xl bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-800">
+                  Select mulch, soil, sand, or stone in the previous step so
+                  there is a shop product to add to the cart.
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -596,39 +639,77 @@ export function HelpFlow() {
         )}
 
         {visibleSteps[step] === "Installation help" && (
-          <div className="grid gap-3 md:grid-cols-2">
-            {serviceOptions.map((option) => (
-              <label
-                key={option.key}
-                className={cn(
-                  "flex cursor-pointer gap-3 rounded-3xl border p-4 transition hover:-translate-y-0.5",
-                  services.includes(option.key)
-                    ? "border-emerald-600 bg-emerald-50"
-                    : "border-emerald-900/10 bg-white/70",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  checked={services.includes(option.key)}
-                  onChange={() =>
-                    setServices((current) =>
-                      current.includes(option.key)
-                        ? current.filter((k) => k !== option.key)
-                        : [...current, option.key],
-                    )
-                  }
-                  className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
-                />
-                <span>
-                  <span className="block font-black text-emerald-950">
-                    {option.label}
+          <div className="grid gap-4">
+            <p className="text-sm font-semibold text-emerald-950/55">
+              Select all that apply.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              {serviceOptions.map((option) => (
+                <label
+                  key={option.key}
+                  className={cn(
+                    "flex cursor-pointer gap-3 rounded-3xl border p-4 transition hover:-translate-y-0.5",
+                    services.includes(option.key)
+                      ? "border-emerald-600 bg-emerald-50"
+                      : "border-emerald-900/10 bg-white/70",
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    checked={services.includes(option.key)}
+                    onChange={() => toggleService(option.key)}
+                    className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
+                  />
+                  <span>
+                    <span className="block font-black text-emerald-950">
+                      {option.label}
+                    </span>
+                    <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
+                      {option.description}
+                    </span>
                   </span>
-                  <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
-                    {option.description}
-                  </span>
-                </span>
-              </label>
-            ))}
+                </label>
+              ))}
+            </div>
+            {services.includes("sitePrep") && (
+              <div className="rounded-3xl border border-emerald-900/10 bg-white/70 p-4">
+                <p className="font-black text-emerald-950">
+                  How much site prep is needed?
+                </p>
+                <p className="mt-1 text-sm font-semibold text-emerald-950/55">
+                  Select one.
+                </p>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  {prepOptions.map((option) => (
+                    <label
+                      key={option.value}
+                      className={cn(
+                        "flex gap-3 rounded-2xl border p-4 transition hover:cursor-pointer hover:-translate-y-0.5",
+                        prepLevel === option.value
+                          ? "border-emerald-600 bg-emerald-50"
+                          : "border-emerald-900/10 bg-white",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="prepLevel"
+                        checked={prepLevel === option.value}
+                        onChange={() => setPrepLevel(option.value)}
+                        className="mt-1 size-4 accent-emerald-600 hover:cursor-pointer"
+                      />
+                      <span>
+                        <span className="block font-black text-emerald-950">
+                          {option.label}
+                        </span>
+                        <span className="mt-1 block text-sm leading-6 text-emerald-950/62">
+                          {option.description}
+                        </span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -764,6 +845,11 @@ export function HelpFlow() {
                     .filter(Boolean)
                     .join(", ")}
                 </p>
+                {selectedPrepOption && services.includes("sitePrep") && (
+                  <p className="mt-1 text-emerald-950/62">
+                    Site prep level: {selectedPrepOption.label}
+                  </p>
+                )}
               </div>
             )}
             {materialFamily && quantity && (
@@ -776,11 +862,21 @@ export function HelpFlow() {
                       {formatCurrency(estimate.materialSubtotal)}
                     </span>
                   </div>
+                  {serviceSubtotal > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-emerald-950/62">Selected services</span>
+                      <span className="font-black text-emerald-950">
+                        {formatCurrency(serviceSubtotal)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <Separator />
                 <div className="flex justify-between text-xl font-black text-emerald-950">
-                  <span>Product total</span>
-                  <span>{formatCurrency(estimate.materialSubtotal)}</span>
+                  <span>Estimated total</span>
+                  <span>
+                    {formatCurrency(estimate.materialSubtotal + serviceSubtotal)}
+                  </span>
                 </div>
               </>
             )}
