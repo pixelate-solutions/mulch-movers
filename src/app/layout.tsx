@@ -18,9 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mulch Movers | Fast Mulch Delivery in Metro Detroit",
+  title: "Mulch Movers | We mulch. You enjoy.",
   description:
-    "Veteran owned Mulch Movers sources mulch, gravel, sand, soil, and landscape materials from trusted Metro Detroit suppliers for fast local delivery.",
+    "Veteran owned Mulch Movers sources mulch from trusted Metro Detroit suppliers for fast local delivery and installation.",
 };
 
 export default function RootLayout({

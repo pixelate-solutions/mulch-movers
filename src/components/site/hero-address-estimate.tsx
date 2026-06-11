@@ -11,13 +11,13 @@ export function HeroAddressEstimate() {
   const [, setAddress] = useState<GeocodedAddress | null>(null);
 
   return (
-    <div className="mt-4 grid gap-3 rounded-[1.5rem] border border-emerald-900/10 bg-white/75 p-4 shadow-inner shadow-emerald-950/5 backdrop-blur sm:grid-cols-[1fr_auto] sm:items-start">
+    <div className="grid gap-3 rounded-[1.25rem] border border-emerald-900/10 bg-white p-3 shadow-inner shadow-emerald-950/5 sm:grid-cols-[1fr_auto] sm:items-start">
       <AddressAutocomplete
         placeholder="Enter project address"
         onInputChange={() => setAddress(null)}
         onSelect={setAddress}
       />
-      <Button asChild>
+      <Button asChild className="h-12 px-6">
         <Link href="/shop">Estimate</Link>
       </Button>
     </div>

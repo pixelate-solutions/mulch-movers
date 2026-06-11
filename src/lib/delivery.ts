@@ -1,44 +1,44 @@
 import type { CartItem } from "@/types/product";
+import type { Product } from "@/types/product";
+import {
+  calculateDeliveryPricing,
+  deliveryZones,
+  isServiceableAddress,
+  serviceableDeliveryMessage,
+} from "@/lib/pricing";
 
 export type GeocodedAddress = {
   id: string;
   label: string;
+  county?: string;
+  state?: string;
+  postcode?: string;
   longitude?: number;
   latitude?: number;
 };
 
-export function calculateSelectedAddressDelivery(
-  address: GeocodedAddress,
-  itemCount: number,
-) {
-  const label = address.label.toLowerCase();
-  const cityFee =
-    label.includes("detroit") || label.includes("highland park")
-      ? 49
-      : label.includes("troy") || label.includes("birmingham")
-        ? 48
-        : label.includes("royal oak") || label.includes("ferndale")
-          ? 44
-          : 46;
-  const window =
-    cityFee <= 44
-      ? "Next available morning"
-      : cityFee <= 48
-        ? "2 business days"
-        : "Next available afternoon";
+export const flatDeliveryFee = 80;
+export const oaklandCountyDeliveryMessage =
+  serviceableDeliveryMessage;
+export const distanceDeliveryFeeTiers = deliveryZones;
 
-  return {
-    fee: cityFee + Math.max(0, itemCount - 1) * 8,
-    window,
-  };
+export function isOaklandCountyAddress(address: GeocodedAddress | null) {
+  return isServiceableAddress(address);
 }
 
-export function calculateDeliveryFee(address: string, itemCount: number) {
-  const baseFee = address.trim().length > 0 ? 39 : 49;
-  const loadFee = Math.max(0, itemCount - 1) * 7;
-  const distanceSignal = address.trim().length % 18;
+export function calculateSelectedAddressDelivery(
+  address: GeocodedAddress,
+  _itemCount: number,
+) {
+  void _itemCount;
 
-  return baseFee + loadFee + distanceSignal;
+  return calculateDeliveryPricing(address);
+}
+
+export function calculateDeliveryFee(address: string, _itemCount: number) {
+  void _itemCount;
+
+  return address.trim().length > 0 ? flatDeliveryFee : 0;
 }
 
 export function getDeliveryWindow(address: string) {
@@ -58,9 +58,17 @@ export function getDeliveryWindow(address: string) {
 
 export function getCartSubtotal(items: CartItem[]) {
   return items.reduce(
-    (total, item) => total + item.product.startingPrice * item.quantity,
+    (total, item) => total + getProductLineSubtotal(item.product, item.quantity),
     0,
   );
+}
+
+export function roundCurrency(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+export function getProductLineSubtotal(product: Product, quantity: number) {
+  return roundCurrency(product.startingPrice) * quantity;
 }
 
 export function getCartQuantity(items: CartItem[]) {
@@ -71,6 +79,7 @@ export function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    maximumFractionDigits: 2,
   }).format(value);
 }

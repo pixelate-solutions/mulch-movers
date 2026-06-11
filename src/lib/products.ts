@@ -7,12 +7,19 @@ export const categoryQuantityLimits = {
   Soil: 2,
 } as const;
 
+export const materialUnitPrices = {
+  Mulch: 43.725,
+  Stone: 62.5,
+  Sand: 62.5,
+  Soil: 43.75,
+} as const;
+
 export const products: Product[] = [
   {
     id: "brown-mulch",
     name: "Brown Mulch",
     category: "Mulch",
-    startingPrice: 38,
+    startingPrice: materialUnitPrices.Mulch,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Mulch,
     description: "A clean, rich brown finish for beds, trees, and curb appeal refreshes.",
@@ -23,7 +30,7 @@ export const products: Product[] = [
     id: "black-mulch",
     name: "Black Mulch",
     category: "Mulch",
-    startingPrice: 42,
+    startingPrice: materialUnitPrices.Mulch,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Mulch,
     description: "Deep contrast mulch for modern landscaping and crisp garden edges.",
@@ -34,7 +41,7 @@ export const products: Product[] = [
     id: "red-mulch",
     name: "Red Mulch",
     category: "Mulch",
-    startingPrice: 41,
+    startingPrice: materialUnitPrices.Mulch,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Mulch,
     description: "Warm red mulch that brings bold color to front yards and walkways.",
@@ -45,7 +52,7 @@ export const products: Product[] = [
     id: "natural-mulch",
     name: "Natural Hardwood Mulch",
     category: "Mulch",
-    startingPrice: 34,
+    startingPrice: materialUnitPrices.Mulch,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Mulch,
     description: "Undyed hardwood mulch with a classic, organic look.",
@@ -56,7 +63,7 @@ export const products: Product[] = [
     id: "cedar-mulch",
     name: "Cedar Mulch",
     category: "Mulch",
-    startingPrice: 46,
+    startingPrice: materialUnitPrices.Mulch,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Mulch,
     description: "Aromatic natural mulch with a lighter tone for premium beds.",
@@ -67,7 +74,7 @@ export const products: Product[] = [
     id: "arborist-mulch",
     name: "Arborist Mulch",
     category: "Mulch",
-    startingPrice: 28,
+    startingPrice: materialUnitPrices.Mulch,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Mulch,
     description: "Budget-friendly mixed wood chips for utility and natural areas.",
@@ -78,7 +85,7 @@ export const products: Product[] = [
     id: "pea-gravel",
     name: "Pea Gravel",
     category: "Stone",
-    startingPrice: 56,
+    startingPrice: materialUnitPrices.Stone,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Stone,
     description: "Rounded decorative stone for paths, drainage, patios, and play areas.",
@@ -89,7 +96,7 @@ export const products: Product[] = [
     id: "crushed-limestone",
     name: "Crushed Limestone",
     category: "Stone",
-    startingPrice: 61,
+    startingPrice: materialUnitPrices.Stone,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Stone,
     description: "Compactable aggregate for driveways, bases, drainage, and utility areas.",
@@ -100,7 +107,7 @@ export const products: Product[] = [
     id: "mason-sand",
     name: "Mason Sand",
     category: "Sand",
-    startingPrice: 49,
+    startingPrice: materialUnitPrices.Sand,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Sand,
     description: "Fine screened sand for pavers, leveling, masonry, and play spaces.",
@@ -111,7 +118,7 @@ export const products: Product[] = [
     id: "topsoil",
     name: "Topsoil",
     category: "Soil",
-    startingPrice: 45,
+    startingPrice: materialUnitPrices.Soil,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Soil,
     description: "Screened topsoil for grading, lawn repairs, planters, and new beds.",
@@ -122,7 +129,7 @@ export const products: Product[] = [
     id: "compost",
     name: "Compost",
     category: "Soil",
-    startingPrice: 52,
+    startingPrice: materialUnitPrices.Soil,
     unit: "cubic yard",
     maxCubicYards: categoryQuantityLimits.Soil,
     description: "Nutrient-rich organic compost for gardens, soil building, and amendments.",
@@ -130,6 +137,10 @@ export const products: Product[] = [
     imageClassName: "from-zinc-950 via-stone-800 to-lime-800",
   },
 ];
+
+export const shoppableProducts = products.filter(
+  (product) => product.category === "Mulch",
+);
 
 export function getProduct(productId: string) {
   return products.find((product) => product.id === productId);

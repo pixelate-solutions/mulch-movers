@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  Calculator,
   Check,
   ClipboardCheck,
   MapPin,
-  Ruler,
   ShoppingCart,
 } from "lucide-react";
 
@@ -20,7 +20,12 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency, type GeocodedAddress } from "@/lib/delivery";
+import {
+  formatCurrency,
+  isOaklandCountyAddress,
+  oaklandCountyDeliveryMessage,
+  type GeocodedAddress,
+} from "@/lib/delivery";
 import { formatDisplayDate, localDateValue } from "@/lib/dates";
 import {
   clampMaterialQuantity,
@@ -31,7 +36,7 @@ import {
   type PrepLevel,
   type ServiceKey,
 } from "@/lib/order-estimates";
-import { products } from "@/lib/products";
+import { shoppableProducts } from "@/lib/products";
 import { cn } from "@/lib/utils";
 
 const materialOptions: {
@@ -43,21 +48,6 @@ const materialOptions: {
     value: "mulch",
     label: "Mulch",
     description: "Bed refresh, curb appeal, tree rings, and garden paths.",
-  },
-  {
-    value: "soil",
-    label: "Soil",
-    description: "Topsoil or compost for grading, lawn repair, and beds.",
-  },
-  {
-    value: "sand",
-    label: "Sand",
-    description: "Leveling, paver base, masonry, and play spaces.",
-  },
-  {
-    value: "stone",
-    label: "Stone",
-    description: "Drainage, decorative beds, paths, and compacted bases.",
   },
   {
     value: "debris",
@@ -111,12 +101,42 @@ const prepOptions: { value: PrepLevel; label: string; description: string }[] = 
   },
 ];
 
+const helpFlowStorageKey = "mulch-movers-help-flow";
+
+type StoredHelpFlow = {
+  step: number;
+  address: GeocodedAddress | null;
+  desiredDate: string;
+  selectedMaterialFamilies: MaterialFamily[];
+  productIds: string[];
+  selectedMulchUseCases: string[];
+  quantity: string;
+  services: ServiceKey[];
+  prepLevel: PrepLevel | "";
+  added: boolean;
+};
+
 function parseNumber(value: string) {
   return Number(value) || 0;
 }
 
+function readStoredHelpFlow() {
+  try {
+    const storedDraft = window.localStorage.getItem(helpFlowStorageKey);
+
+    if (!storedDraft) {
+      return null;
+    }
+
+    return JSON.parse(storedDraft) as StoredHelpFlow;
+  } catch {
+    return null;
+  }
+}
+
 export function HelpFlow() {
-  const { addItem, setDeliveryAddress, setProjectConfig } = useCart();
+  const { addItem, deliveryAddress, setDeliveryAddress, setProjectConfig } =
+    useCart();
   const [step, setStep] = useState(0);
   const [address, setAddress] = useState<GeocodedAddress | null>(null);
   const [desiredDate, setDesiredDate] = useState("");
@@ -128,13 +148,11 @@ export function HelpFlow() {
     [],
   );
   const [quantity, setQuantity] = useState("");
-  const [length, setLength] = useState("20");
-  const [width, setWidth] = useState("10");
-  const [depth, setDepth] = useState("3");
   const [services, setServices] = useState<ServiceKey[]>([]);
   const [prepLevel, setPrepLevel] = useState<PrepLevel | "">("");
   const [added, setAdded] = useState(false);
   const [stepError, setStepError] = useState("");
+  const hasLoadedDraft = useRef(false);
 
   const visibleSteps = useMemo(
     () =>
@@ -150,6 +168,8 @@ export function HelpFlow() {
       ].filter(Boolean) as string[],
     [selectedMaterialFamilies],
   );
+  const currentStepIndex = Math.min(step, Math.max(visibleSteps.length - 1, 0));
+  const currentStepName = visibleSteps[currentStepIndex];
   const materialFamily = selectedMaterialFamilies[0] ?? null;
   const shoppableMaterialFamilies = selectedMaterialFamilies.filter(
     (family) => family !== "debris",
@@ -164,7 +184,7 @@ export function HelpFlow() {
     [selectedMulchUseCases],
   );
 
-  const productOptions = products.filter((item) => {
+  const productOptions = shoppableProducts.filter((item) => {
     const category = item.category.toLowerCase() as MaterialFamily;
     if (!selectedMaterialFamilies.includes(category)) return false;
     if (category === "mulch" && mulchGuidanceProductIds.size > 0) {
@@ -186,15 +206,9 @@ export function HelpFlow() {
       : 0;
   const activePrepLevel: PrepLevel =
     services.includes("sitePrep") && prepLevel ? prepLevel : "ready";
-  const measuredQuantity = useMemo(() => {
-    const cubicYards =
-      (parseNumber(length) * parseNumber(width) * (parseNumber(depth) / 12)) /
-      27;
-
-    return Math.ceil(cubicYards);
-  }, [depth, length, width]);
   const estimate = estimateOrder({
     address: address?.label ?? "",
+    deliveryAddress: address,
     productId: product?.id ?? productOptions[0]?.id ?? "brown-mulch",
     quantity: safeQuantity,
     family: selectedFamily,
@@ -207,10 +221,81 @@ export function HelpFlow() {
   const selectedPrepOption = prepOptions.find(
     (option) => option.value === prepLevel,
   );
+  const hasCountyBlockedAddress =
+    Boolean(address) && !isOaklandCountyAddress(address);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      const storedDraft = readStoredHelpFlow();
+
+      if (storedDraft) {
+        setStep(storedDraft.step);
+        setAddress(storedDraft.address);
+        setDesiredDate(storedDraft.desiredDate);
+        setSelectedMaterialFamilies(storedDraft.selectedMaterialFamilies);
+        setProductIds(storedDraft.productIds);
+        setSelectedMulchUseCases(storedDraft.selectedMulchUseCases);
+        setQuantity(storedDraft.quantity);
+        setServices(storedDraft.services);
+        setPrepLevel(storedDraft.prepLevel);
+        setAdded(storedDraft.added);
+      }
+
+      hasLoadedDraft.current = true;
+    });
+  }, []);
+
+  useEffect(() => {
+    const animationFrame = window.requestAnimationFrame(() => {
+      if (deliveryAddress && deliveryAddress.id !== address?.id) {
+        setAddress(deliveryAddress);
+      }
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [address?.id, deliveryAddress]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !hasLoadedDraft.current) {
+      return;
+    }
+
+    const storedDraft: StoredHelpFlow = {
+      step,
+      address,
+      desiredDate,
+      selectedMaterialFamilies,
+      productIds,
+      selectedMulchUseCases,
+      quantity,
+      services,
+      prepLevel,
+      added,
+    };
+
+    window.localStorage.setItem(
+      helpFlowStorageKey,
+      JSON.stringify(storedDraft),
+    );
+  }, [
+    added,
+    address,
+    desiredDate,
+    prepLevel,
+    productIds,
+    quantity,
+    selectedMaterialFamilies,
+    selectedMulchUseCases,
+    services,
+    step,
+  ]);
 
   function goNext() {
-    const currentStep = visibleSteps[step];
-    const error = getStepError(currentStep);
+    const error = getStepError(currentStepName);
 
     if (error) {
       setStepError(error);
@@ -218,11 +303,11 @@ export function HelpFlow() {
     }
 
     setStepError("");
-    setStep((current) => Math.min(current + 1, visibleSteps.length - 1));
+    setStep(Math.min(currentStepIndex + 1, visibleSteps.length - 1));
   }
 
   function goBack() {
-    setStep((current) => Math.max(current - 1, 0));
+    setStep(Math.max(currentStepIndex - 1, 0));
   }
 
   function toggleMaterialFamily(family: MaterialFamily) {
@@ -233,7 +318,7 @@ export function HelpFlow() {
       const nextPrimaryFamily = next.find((item) => item !== "debris");
 
       if (nextPrimaryFamily) {
-        const nextProduct = products.find(
+        const nextProduct = shoppableProducts.find(
           (item) => item.category.toLowerCase() === nextPrimaryFamily,
         );
 
@@ -305,6 +390,9 @@ export function HelpFlow() {
     if (currentStep === "Project location" && !address) {
       return "Select a suggested project address before continuing.";
     }
+    if (currentStep === "Project location" && !isOaklandCountyAddress(address)) {
+      return oaklandCountyDeliveryMessage;
+    }
     if (currentStep === "Project timing" && !desiredDate) {
       return "Pick a project date before continuing.";
     }
@@ -313,7 +401,7 @@ export function HelpFlow() {
         return "Select at least one project need.";
       }
       if (shoppableMaterialFamilies.length === 0) {
-        return "Select at least one deliverable material so we can add a shop product to the cart.";
+        return "Select mulch so we can add a product to the cart.";
       }
     }
     if (
@@ -389,13 +477,13 @@ export function HelpFlow() {
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-emerald-700">
-              Question {step + 1} of {visibleSteps.length}
+              Question {currentStepIndex + 1} of {visibleSteps.length}
             </p>
             <h2 className="mt-2 text-3xl font-black text-emerald-950">
-              {visibleSteps[step]}
+              {currentStepName}
             </h2>
           </div>
-          <Badge variant="outline">{Math.round(((step + 1) / visibleSteps.length) * 100)}%</Badge>
+          <Badge variant="outline">{Math.round(((currentStepIndex + 1) / visibleSteps.length) * 100)}%</Badge>
         </div>
         {stepError && (
           <div className="mb-5 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
@@ -403,20 +491,37 @@ export function HelpFlow() {
           </div>
         )}
 
-        {visibleSteps[step] === "Project location" && (
+        {currentStepName === "Project location" && (
           <div>
             <div className="grid gap-2 text-sm font-bold text-emerald-950">
               Where is your project?
               <AddressAutocomplete
+                key={address?.id ?? "new-address"}
+                defaultValue={address?.label ?? ""}
                 placeholder="Start typing project address"
-                onInputChange={() => setAddress(null)}
-                onSelect={setAddress}
+                onInputChange={() => {
+                  setAddress(null);
+                  setDeliveryAddress(null);
+                }}
+                onSelect={(selectedAddress) => {
+                  setAddress(selectedAddress);
+                  setDeliveryAddress(
+                    isOaklandCountyAddress(selectedAddress)
+                      ? selectedAddress
+                      : null,
+                  );
+                }}
               />
+              {hasCountyBlockedAddress && (
+                <p className="text-sm font-bold text-red-700">
+                  {oaklandCountyDeliveryMessage}
+                </p>
+              )}
             </div>
           </div>
         )}
 
-        {visibleSteps[step] === "Project timing" && (
+        {currentStepName === "Project timing" && (
           <label className="grid gap-2 text-sm font-bold text-emerald-950">
             When would you like to accomplish your project?
             <DatePicker
@@ -427,7 +532,7 @@ export function HelpFlow() {
           </label>
         )}
 
-        {visibleSteps[step] === "Material need" && (
+        {currentStepName === "Material need" && (
           <div className="grid gap-4">
             <p className="text-sm font-semibold text-emerald-950/55">
               Select all that apply.
@@ -463,7 +568,7 @@ export function HelpFlow() {
           </div>
         )}
 
-        {visibleSteps[step] === "Mulch guidance" && (
+        {currentStepName === "Mulch guidance" && (
           <div className="grid gap-4">
             <p className="text-sm font-semibold text-emerald-950/55">
               Select all that apply.
@@ -499,7 +604,7 @@ export function HelpFlow() {
           </div>
         )}
 
-        {visibleSteps[step] === "Exact material" && (
+        {currentStepName === "Exact material" && (
           <div className="grid gap-4">
             <p className="text-sm font-semibold text-emerald-950/55">
               Select all that apply.
@@ -542,15 +647,15 @@ export function HelpFlow() {
               ))}
               {productOptions.length === 0 && (
                 <div className="rounded-3xl bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-800">
-                  Select mulch, soil, sand, or stone in the previous step so
-                  there is a shop product to add to the cart.
+                  Select mulch in the previous step so there is a product to
+                  add to the cart.
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {visibleSteps[step] === "Quantity" && (
+        {currentStepName === "Quantity" && (
           <div className="grid gap-5">
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
               Quantity in whole cubic yards
@@ -567,78 +672,30 @@ export function HelpFlow() {
               </span>
             </label>
             {materialFamily !== "debris" && (
-              <div className="rounded-3xl bg-emerald-950 p-4 text-white">
-                <div className="mb-4 flex items-center gap-2">
-                  <Ruler className="size-5 text-emerald-200" />
-                  <h3 className="font-black">Measurement guide</h3>
+              <div className="flex flex-col gap-3 rounded-2xl border border-emerald-900/10 bg-emerald-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-2">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-700">
+                    <Calculator className="size-4" />
+                  </span>
+                  <div>
+                    <h3 className="text-sm font-black text-emerald-950">
+                      Need help calculating?
+                    </h3>
+                    <p className="mt-0.5 text-xs leading-5 text-emerald-950/62">
+                      Estimate cubic yards, then return and enter the rounded
+                      quantity.
+                    </p>
+                  </div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <label className="grid gap-2 text-xs font-bold text-emerald-100">
-                    Length (feet)
-                    <Input
-                      value={length}
-                      onChange={(event) => setLength(event.target.value)}
-                      type="number"
-                      min="0"
-                      placeholder="20"
-                      className="bg-white text-emerald-950"
-                    />
-                  </label>
-                  <label className="grid gap-2 text-xs font-bold text-emerald-100">
-                    Width (feet)
-                    <Input
-                      value={width}
-                      onChange={(event) => setWidth(event.target.value)}
-                      type="number"
-                      min="0"
-                      placeholder="10"
-                      className="bg-white text-emerald-950"
-                    />
-                  </label>
-                  <label className="grid gap-2 text-xs font-bold text-emerald-100">
-                    Depth (inches)
-                    <Input
-                      value={depth}
-                      onChange={(event) => setDepth(event.target.value)}
-                      type="number"
-                      min="0"
-                      placeholder="3"
-                      className="bg-white text-emerald-950"
-                    />
-                  </label>
-                </div>
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-emerald-50/75">
-                    Suggested quantity:{" "}
-                    <span className="font-black text-white">
-                      {measuredQuantity} whole cubic yards
-                    </span>
-                  </p>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() =>
-                      setQuantity(
-                        String(
-                          Math.ceil(
-                            clampMaterialQuantity(
-                              selectedFamily,
-                              measuredQuantity,
-                            ),
-                          ),
-                        ),
-                      )
-                    }
-                  >
-                    Use estimate
-                  </Button>
-                </div>
+                <Button asChild variant="secondary" size="sm" className="shrink-0">
+                  <Link href="/calculator">Open calculator</Link>
+                </Button>
               </div>
             )}
           </div>
         )}
 
-        {visibleSteps[step] === "Installation help" && (
+        {currentStepName === "Installation help" && (
           <div className="grid gap-4">
             <p className="text-sm font-semibold text-emerald-950/55">
               Select all that apply.
@@ -713,7 +770,7 @@ export function HelpFlow() {
           </div>
         )}
 
-        {visibleSteps[step] === "Review" && (
+        {currentStepName === "Review" && (
           <div className="rounded-3xl bg-emerald-950 p-5 text-white">
             <div className="flex items-center gap-3">
               <ClipboardCheck className="size-6 text-emerald-200" />
@@ -721,18 +778,20 @@ export function HelpFlow() {
             </div>
             <p className="mt-3 text-sm leading-6 text-emerald-50/75">
               Review the configuration on the side. Add it to your order when
-              you are ready. This adds the exact shop product and yard quantity
+              you are ready. This adds the exact mulch product and yard quantity
               to your cart.
             </p>
-            <Button
-              type="button"
-              size="lg"
-              className="mt-5 bg-lime-400 text-emerald-950 hover:bg-lime-300"
-              onClick={addProductToCart}
-            >
-              <ShoppingCart />
-              Add product to cart
-            </Button>
+            <div className="mt-5 flex justify-center">
+              <Button
+                type="button"
+                size="lg"
+                className="bg-lime-400 text-emerald-950 hover:bg-lime-300"
+                onClick={addProductToCart}
+              >
+                <ShoppingCart />
+                Add product to cart
+              </Button>
+            </div>
             {added && (
               <div className="mt-4 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-emerald-50">
                 <Check className="mr-2 inline size-4" />
@@ -750,14 +809,21 @@ export function HelpFlow() {
           <Button
             type="button"
             variant="secondary"
-            disabled={step === 0}
+            disabled={currentStepIndex === 0}
             onClick={goBack}
           >
             <ArrowLeft />
             Back
           </Button>
-          {step < visibleSteps.length - 1 ? (
-            <Button type="button" onClick={goNext}>
+          {currentStepIndex < visibleSteps.length - 1 ? (
+            <Button
+              type="button"
+              disabled={
+                currentStepName === "Project location" &&
+                hasCountyBlockedAddress
+              }
+              onClick={goNext}
+            >
               Next
               <ArrowRight />
             </Button>

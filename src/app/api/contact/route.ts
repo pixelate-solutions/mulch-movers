@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-import { adminEmail, resendFromEmail } from "@/lib/email";
+import { contactRecipientEmail, resendFromEmail } from "@/lib/email";
 import { isValidUsPhone } from "@/lib/phone";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
 
   const result = await resend.emails.send({
     from: resendFromEmail,
-    to: adminEmail,
+    to: contactRecipientEmail,
     replyTo: contact.email,
     subject: `New contact request - ${contact.name}`,
     html: buildContactHtml(contact),

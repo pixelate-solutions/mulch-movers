@@ -3,10 +3,11 @@ import Image from "next/image";
 import { Mail, MapPin, Phone, ShieldCheck } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
+import { serviceAreaZipCodes } from "@/lib/pricing";
 
 const quickLinks = [
   { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop Materials" },
+  { href: "/shop", label: "Shop Mulch" },
   { href: "/help", label: "Help Me Choose" },
   { href: "/calculator", label: "Calculator" },
   { href: "/contact", label: "Contact" },
@@ -14,25 +15,28 @@ const quickLinks = [
   { href: "/checkout", label: "Checkout" },
 ];
 
+const serviceAreaZipList = Object.keys(serviceAreaZipCodes).sort().join(", ");
+
 export function Footer() {
   return (
     <footer className="border-t border-white/60 bg-emerald-950 text-white">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.3fr_1fr_1fr] lg:px-8">
         <div>
           <div className="mb-4 flex items-center gap-3">
-            <span className="relative size-12 shrink-0">
+            <span className="relative size-12 shrink-0 overflow-hidden rounded-2xl bg-white/80 p-1 shadow-sm shadow-emerald-950/20">
               <Image
-                src="/mulch-movers-logo.png"
+                src="/mulch-movers-logo.png?v=2026-06-08"
                 alt="Mulch Movers logo"
                 fill
                 sizes="48px"
                 className="object-contain drop-shadow-lg"
+                unoptimized
               />
             </span>
             <div>
-              <p className="text-xl font-black tracking-tight">Mulch Movers</p>
+              <p className="text-xl font-black tracking-tight">Mulch Movers LLC</p>
               <p className="text-sm text-emerald-100">
-                Veteran owned local material delivery
+                We mulch. You enjoy.
               </p>
             </div>
           </div>
@@ -53,7 +57,17 @@ export function Footer() {
           <div className="space-y-3 text-sm text-emerald-50/75">
             <p className="flex items-start gap-3">
               <MapPin className="mt-0.5 size-4 text-emerald-300" />
-              Metro Detroit, including Oakland, Macomb, and Wayne County communities.
+              <span className="group relative inline-flex w-fit">
+                <span
+                  tabIndex={0}
+                  className="rounded-full outline-none transition hover:cursor-help hover:text-white focus-visible:text-white focus-visible:ring-2 focus-visible:ring-emerald-300"
+                >
+                  Approved local ZIP codes
+                </span>
+                <span className="pointer-events-none absolute bottom-full left-0 z-50 mb-3 w-64 rounded-2xl border border-white/15 bg-white/95 px-4 py-3 text-sm font-semibold leading-6 text-emerald-950 opacity-0 shadow-2xl shadow-emerald-950/30 transition group-hover:opacity-100 group-focus-within:opacity-100">
+                  {serviceAreaZipList}
+                </span>
+              </span>
             </p>
             <p className="flex items-center gap-3">
               <Phone className="size-4 text-emerald-300" />
@@ -61,7 +75,12 @@ export function Footer() {
             </p>
             <p className="flex items-center gap-3">
               <Mail className="size-4 text-emerald-300" />
-              info@movingmulch.com
+              <a
+                href="mailto:info@movingmulch.com"
+                className="transition hover:cursor-pointer hover:text-white"
+              >
+                info@movingmulch.com
+              </a>
             </p>
           </div>
         </div>
@@ -84,7 +103,7 @@ export function Footer() {
       </div>
       <Separator className="bg-white/10" />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-emerald-50/60 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <p>© 2026 Mulch Movers. All rights reserved.</p>
+        <p>© 2026 Mulch Movers LLC. All rights reserved.</p>
         <p>Online estimates include material, service, debris, and schedule capacity.</p>
       </div>
     </footer>

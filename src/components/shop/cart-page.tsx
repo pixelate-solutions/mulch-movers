@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ClipboardList, Minus, Plus, ShoppingBag, Trash2, Truck, Wrench } from "lucide-react";
+import { Minus, Plus, ShoppingBag, Trash2, Truck, Wrench } from "lucide-react";
 
 import { useCart } from "@/components/shop/cart-provider";
 import { GlassCard } from "@/components/site/glass-card";
@@ -16,6 +16,7 @@ import { estimateOrder, serviceOptions } from "@/lib/order-estimates";
 export function CartPage() {
   const {
     items,
+    deliveryAddress,
     projectConfig,
     removeItem,
     setProjectConfig,
@@ -25,6 +26,7 @@ export function CartPage() {
   const projectEstimate = projectConfig
     ? estimateOrder({
         address: projectConfig.address,
+        deliveryAddress,
         productId: projectConfig.productId,
         quantity: projectConfig.quantity,
         family: projectConfig.materialFamily,
@@ -50,11 +52,11 @@ export function CartPage() {
           Your cart is ready for materials.
         </h1>
         <p className="mt-3 text-emerald-950/65">
-          Add mulch, gravel, sand, soil, or compost to start a delivery estimate.
+          Add mulch through the guided order flow to start a delivery estimate.
         </p>
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <Button asChild size="lg">
-            <Link href="/shop">Shop materials</Link>
+            <Link href="/shop">Shop mulch</Link>
           </Button>
           <Button asChild size="lg" variant="secondary">
             <Link href="/help">Get help choosing</Link>
@@ -168,29 +170,6 @@ export function CartPage() {
               </GlassCard>
             );
           })}
-        {projectConfig && (
-          <GlassCard className="p-4">
-            <div className="flex items-start gap-3">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-lime-100 text-lime-700">
-                <ClipboardList className="size-5" />
-              </span>
-              <div>
-                <Badge variant="secondary">Project details</Badge>
-                <p className="mt-2 text-sm leading-6 text-emerald-950/62">
-                  Desired date:{" "}
-                  {projectConfig.desiredDate
-                    ? formatDisplayDate(projectConfig.desiredDate)
-                    : "Not selected"}
-                </p>
-                {projectConfig.notes && (
-                  <p className="mt-1 text-sm leading-6 text-emerald-950/62">
-                    Notes: {projectConfig.notes}
-                  </p>
-                )}
-              </div>
-            </div>
-          </GlassCard>
-        )}
       </div>
 
       <GlassCard className="h-fit p-6 lg:sticky lg:top-28">
@@ -207,6 +186,27 @@ export function CartPage() {
           </div>
         </div>
         <Separator className="my-5" />
+        {projectConfig && (
+          <>
+            <div className="rounded-3xl bg-lime-50 p-4 text-sm">
+              <Badge variant="secondary">Project details</Badge>
+              <p className="mt-2 flex justify-between gap-4 leading-6">
+                <span className="text-emerald-950/62">Desired date</span>
+                <span className="text-right font-black text-emerald-950">
+                  {projectConfig.desiredDate
+                    ? formatDisplayDate(projectConfig.desiredDate)
+                    : "Not selected"}
+                </span>
+              </p>
+              {projectConfig.notes && (
+                <p className="mt-1 leading-6 text-emerald-950/62">
+                  Notes: {projectConfig.notes}
+                </p>
+              )}
+            </div>
+            <Separator className="my-5" />
+          </>
+        )}
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-emerald-950/62">Subtotal</span>

@@ -1,4 +1,9 @@
 import { products } from "@/lib/products";
+import {
+  calculateAddOnPricing,
+  calculateDeliveryPricing,
+} from "@/lib/pricing";
+import type { GeocodedAddress } from "@/lib/delivery";
 
 export type ProjectMode = "ready" | "guidance";
 export type MaterialFamily = "mulch" | "soil" | "sand" | "stone" | "debris";
@@ -56,27 +61,20 @@ export const serviceOptions: {
   },
 ];
 
-const prepLevelHours: Record<PrepLevel, number> = {
+const prepLevelLaborUnitsPerYard: Record<PrepLevel, number> = {
   ready: 0,
-  light: 2,
-  moderate: 3,
-  heavy: 4,
-};
-
-const prepLevelPricing: Record<PrepLevel, number> = {
-  ready: 0,
-  light: 145,
-  moderate: 240,
-  heavy: 340,
+  light: 0.5,
+  moderate: 0.75,
+  heavy: 1,
 };
 
 export const scheduleDays = [
-  { date: "2026-05-23", label: "Sat, May 23", openHours: 4, windows: ["8-11 AM", "12-3 PM"] },
-  { date: "2026-05-25", label: "Mon, May 25", openHours: 6, windows: ["9-12 PM", "1-4 PM"] },
-  { date: "2026-05-26", label: "Tue, May 26", openHours: 3, windows: ["10-1 PM"] },
-  { date: "2026-05-27", label: "Wed, May 27", openHours: 7, windows: ["8-11 AM", "12-3 PM", "3-5 PM"] },
-  { date: "2026-05-28", label: "Thu, May 28", openHours: 5, windows: ["9-12 PM", "1-4 PM"] },
-  { date: "2026-05-29", label: "Fri, May 29", openHours: 2, windows: ["8-11 AM"] },
+  { date: "2026-06-08", label: "Mon, Jun 8", openHours: 6, windows: ["9-12 PM", "1-4 PM"] },
+  { date: "2026-06-09", label: "Tue, Jun 9", openHours: 3, windows: ["10-1 PM"] },
+  { date: "2026-06-10", label: "Wed, Jun 10", openHours: 7, windows: ["8-11 AM", "12-3 PM", "3-5 PM"] },
+  { date: "2026-06-11", label: "Thu, Jun 11", openHours: 5, windows: ["9-12 PM", "1-4 PM"] },
+  { date: "2026-06-12", label: "Fri, Jun 12", openHours: 2, windows: ["8-11 AM"] },
+  { date: "2026-06-13", label: "Sat, Jun 13", openHours: 4, windows: ["8-11 AM", "12-3 PM"] },
 ];
 
 export function getMaterialFamily(productId: string): MaterialFamily {
@@ -111,15 +109,13 @@ export function getProjectHours({
 }) {
   const deliveryHours = 1;
   const installHours =
-    services.includes("mulchInstall") && family === "mulch"
-      ? Math.max(1, quantity * 0.75)
-      : 0;
+    services.includes("mulchInstall") && family !== "debris" ? quantity : 0;
   const prepHours =
     services.includes("sitePrep") || prepLevel !== "ready"
-      ? prepLevelHours[prepLevel]
+      ? quantity * prepLevelLaborUnitsPerYard[prepLevel]
       : 0;
   const debrisHours = services.includes("debrisHaulAway")
-    ? Math.max(1, debrisQuantity * 0.75)
+    ? Math.max(1, debrisQuantity)
     : 0;
 
   return Math.ceil(deliveryHours + installHours + prepHours + debrisHours);
@@ -127,6 +123,7 @@ export function getProjectHours({
 
 export function estimateOrder({
   address,
+  deliveryAddress,
   productId,
   quantity,
   family,
@@ -135,6 +132,7 @@ export function estimateOrder({
   debrisQuantity,
 }: {
   address: string;
+  deliveryAddress?: GeocodedAddress | null;
   productId: string;
   quantity: number;
   family: MaterialFamily;
@@ -145,19 +143,30 @@ export function estimateOrder({
   const product = products.find((item) => item.id === productId) ?? products[0];
   const safeQuantity = clampMaterialQuantity(family, quantity);
   const safeDebrisQuantity = clampMaterialQuantity("debris", debrisQuantity);
-  const deliveryFee = address.trim() ? 45 + Math.max(0, safeQuantity - 1) * 8 : 0;
+  const delivery = deliveryAddress
+    ? calculateDeliveryPricing(deliveryAddress)
+    : null;
+  const deliveryFee = delivery?.fee ?? (address.trim() ? 0 : 0);
   const materialSubtotal = family === "debris" ? 0 : product.startingPrice * safeQuantity;
-  const installSubtotal =
-    services.includes("mulchInstall") && family === "mulch"
-      ? safeQuantity * 72
-      : 0;
-  const prepSubtotal =
-    services.includes("sitePrep") || prepLevel !== "ready"
-      ? prepLevelPricing[prepLevel]
-      : 0;
-  const debrisSubtotal = services.includes("debrisHaulAway")
-    ? 60 + safeDebrisQuantity * 90
+  const addOns = calculateAddOnPricing({
+    deliveryZone: delivery?.zone,
+    prepLevel,
+    quantity: safeQuantity,
+    services,
+  });
+  const installPrepLine = addOns.lineItems.find(
+    (lineItem) => lineItem.key === "installPrep",
+  );
+  const installSubtotal = services.includes("mulchInstall")
+    ? installPrepLine?.total ?? 0
     : 0;
+  const prepSubtotal =
+    !services.includes("mulchInstall") && services.includes("sitePrep")
+      ? installPrepLine?.total ?? 0
+      : 0;
+  const debrisSubtotal =
+    addOns.lineItems.find((lineItem) => lineItem.key === "debrisHaulAway")
+      ?.total ?? 0;
   const projectHours = getProjectHours({
     family,
     quantity: safeQuantity,

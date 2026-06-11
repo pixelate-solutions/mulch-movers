@@ -45,12 +45,13 @@ export function Navbar() {
         >
           <span className="relative size-12 shrink-0">
             <Image
-              src="/mulch-movers-logo.png"
+              src="/mulch-movers-logo.png?v=2026-06-08"
               alt="Mulch Movers logo"
               fill
               sizes="48px"
               className="object-contain drop-shadow-lg"
               priority
+              unoptimized
             />
           </span>
           <span className="leading-tight">

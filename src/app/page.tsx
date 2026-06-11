@@ -27,13 +27,13 @@ export default function Home() {
               Delivery, installation, prep, and cleanup in one order flow.
             </h2>
             <p className="mt-4 text-base leading-7 text-emerald-950/65">
-              The site guides customers through material choice, quantity,
+              The site guides customers through mulch choice, quantity,
               project readiness, haul away needs, and calendar availability so
               pricing and scheduling can happen online.
             </p>
             <Button asChild size="lg" className="mt-7">
               <Link href="/shop">
-                Shop materials
+                Shop mulch
                 <ArrowRight />
               </Link>
             </Button>
@@ -84,7 +84,7 @@ export default function Home() {
                 Ready to price your next delivery?
               </h2>
               <p className="mt-3 max-w-2xl text-emerald-50/75">
-                Use the automated order flow to price materials, services,
+                Use the automated order flow to price mulch, services,
                 project prep, debris cleanup, and available schedule windows.
               </p>
             </div>

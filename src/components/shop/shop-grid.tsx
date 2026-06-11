@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/delivery";
-import { products } from "@/lib/products";
+import { shoppableProducts } from "@/lib/products";
 import type { Product, ProductCategory } from "@/types/product";
 
 import { ProductCard } from "./product-card";
@@ -22,7 +22,7 @@ type CategoryFilter = "All" | ProductCategory;
 type PriceFilter = "all" | "under-40" | "40-50" | "over-50";
 type SortOption = "featured" | "price-low" | "price-high" | "name";
 
-const categoryFilters: CategoryFilter[] = ["All", "Mulch", "Stone", "Sand", "Soil"];
+const categoryFilters: CategoryFilter[] = ["All", "Mulch"];
 
 const priceFilters: { label: string; value: PriceFilter }[] = [
   { label: "Any price", value: "all" },
@@ -54,7 +54,7 @@ export function ShopGrid() {
   const [sortOption, setSortOption] = useState<SortOption>("featured");
 
   const categoryCounts = useMemo(() => {
-    return products.reduce<Record<CategoryFilter, number>>(
+    return shoppableProducts.reduce<Record<CategoryFilter, number>>(
       (counts, product) => {
         counts.All += 1;
         counts[product.category] += 1;
@@ -67,7 +67,7 @@ export function ShopGrid() {
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return products
+    return shoppableProducts
       .filter((product) => {
         const searchableText = [
           product.name,
@@ -112,7 +112,7 @@ export function ShopGrid() {
   }
 
   return (
-    <section className="space-y-6" aria-label="Shop products">
+    <section className="space-y-6" aria-label="Mulch products">
       <div className="rounded-[1.5rem] border border-emerald-900/10 bg-white/70 p-4 shadow-sm shadow-emerald-950/5 backdrop-blur sm:p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem_12rem] lg:items-end">
           <label className="grid gap-2 text-sm font-bold text-emerald-950">
@@ -124,7 +124,7 @@ export function ShopGrid() {
                 autoComplete="off"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search mulch, gravel, topsoil..."
+                placeholder="Search mulch..."
                 className="pl-11 pr-11"
               />
               {query && (
@@ -239,7 +239,7 @@ export function ShopGrid() {
           </p>
           <Button type="button" className="mt-5" onClick={clearFilters}>
             <X />
-            Reset shop
+            Reset filters
           </Button>
         </div>
       )}

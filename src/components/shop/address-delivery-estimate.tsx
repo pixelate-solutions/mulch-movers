@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Clock, MapPin, Truck } from "lucide-react";
 
 import { useCart } from "@/components/shop/cart-provider";
@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import {
   calculateSelectedAddressDelivery,
   formatCurrency,
+  isOaklandCountyAddress,
+  oaklandCountyDeliveryMessage,
   type GeocodedAddress,
 } from "@/lib/delivery";
 
@@ -17,8 +19,20 @@ export function AddressDeliveryEstimate() {
   const { deliveryAddress, itemCount, setDeliveryAddress } = useCart();
   const [selectedAddress, setSelectedAddress] =
     useState<GeocodedAddress | null>(deliveryAddress);
+  const hasCountyBlockedAddress =
+    Boolean(selectedAddress) && !isOaklandCountyAddress(selectedAddress);
 
-  const estimate = selectedAddress
+  useEffect(() => {
+    const animationFrame = window.requestAnimationFrame(() => {
+      if (deliveryAddress && deliveryAddress.id !== selectedAddress?.id) {
+        setSelectedAddress(deliveryAddress);
+      }
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [deliveryAddress, selectedAddress?.id]);
+
+  const estimate = selectedAddress && !hasCountyBlockedAddress
     ? calculateSelectedAddressDelivery(selectedAddress, Math.max(itemCount, 1))
     : null;
 
@@ -47,10 +61,17 @@ export function AddressDeliveryEstimate() {
             }}
             onSelect={(address) => {
               setSelectedAddress(address);
-              setDeliveryAddress(address);
+              setDeliveryAddress(
+                isOaklandCountyAddress(address) ? address : null,
+              );
             }}
           />
-          {selectedAddress && (
+          {hasCountyBlockedAddress && (
+            <p className="mt-2 text-sm font-bold text-red-700">
+              {oaklandCountyDeliveryMessage}
+            </p>
+          )}
+          {selectedAddress && !hasCountyBlockedAddress && (
             <div className="mt-2 flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800">
               <Check className="size-4" />
               Address selected
@@ -64,7 +85,11 @@ export function AddressDeliveryEstimate() {
             Estimated fee
           </p>
           <p className="mt-1 text-base font-black text-emerald-950">
-            {estimate ? formatCurrency(estimate.fee) : "Select address"}
+            {estimate?.zone
+              ? formatCurrency(estimate.fee)
+              : selectedAddress
+                ? "Outside zone"
+                : "Select address"}
           </p>
         </div>
         <div className="rounded-3xl bg-lime-50 px-4 py-3">
@@ -73,7 +98,7 @@ export function AddressDeliveryEstimate() {
             Earliest window
           </p>
           <p className="mt-1 text-lg font-black leading-tight text-emerald-950">
-            {estimate ? estimate.window : "Pending"}
+            {estimate?.zone ? estimate.window : "Pending"}
           </p>
         </div>
       </div>

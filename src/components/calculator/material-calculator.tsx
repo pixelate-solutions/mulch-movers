@@ -136,11 +136,11 @@ export function MaterialCalculator() {
 
       <div className="mt-5 flex flex-col gap-3 rounded-[1.5rem] bg-lime-50 p-4 text-sm leading-6 text-emerald-950/70 sm:flex-row sm:items-center sm:justify-between">
         <p>
-          Mulch orders are capped at 5 cubic yards online. Soil, sand, stone,
-          and debris jobs are capped at 2 cubic yards online.
+          Mulch orders are capped at 5 cubic yards online. Debris cleanup can
+          be added in the guided order flow.
         </p>
         <Button asChild variant="secondary">
-          <a href="/shop">Shop materials</a>
+          <a href="/shop">Shop mulch</a>
         </Button>
       </div>
     </GlassCard>

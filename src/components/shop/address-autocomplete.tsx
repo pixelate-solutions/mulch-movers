@@ -22,6 +22,17 @@ type NominatimResult = {
   class?: string;
   address?: {
     house_number?: string;
+    road?: string;
+    pedestrian?: string;
+    footway?: string;
+    street?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    county?: string;
+    state?: string;
+    postcode?: string;
     country_code?: string;
   };
 };
@@ -52,6 +63,9 @@ type PhotonResponse = {
 type NormalizedAddressResult = {
   id: string;
   label: string;
+  county?: string;
+  state?: string;
+  postcode?: string;
   latitude: number;
   longitude: number;
   precision: number;
@@ -59,14 +73,64 @@ type NormalizedAddressResult = {
 
 const defaultEndpoint = "https://photon.komoot.io/api/";
 const nominatimEndpoint = "https://nominatim.openstreetmap.org/search";
+const stateAbbreviations: Record<string, string> = {
+  michigan: "MI",
+};
 
 function toGeocodedAddress(place: NormalizedAddressResult): GeocodedAddress {
   return {
     id: place.id,
     label: place.label,
+    county: place.county,
+    state: place.state,
+    postcode: place.postcode,
     longitude: place.longitude,
     latitude: place.latitude,
   };
+}
+
+function formatState(state?: string) {
+  if (!state) {
+    return "";
+  }
+
+  return stateAbbreviations[state.toLowerCase()] ?? state;
+}
+
+function formatAddressLabel({
+  streetAddress,
+  city,
+  state,
+  postcode,
+}: {
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postcode?: string;
+}) {
+  const stateLine = [formatState(state), postcode].filter(Boolean).join(" ");
+
+  return [streetAddress, city, stateLine].filter(Boolean).join(", ");
+}
+
+function formatNominatimLabel(result: NominatimResult) {
+  const address = result.address;
+
+  if (!address) {
+    return "";
+  }
+
+  const street =
+    address.road ?? address.pedestrian ?? address.footway ?? address.street;
+  const streetAddress = [address.house_number, street].filter(Boolean).join(" ");
+
+  return formatAddressLabel({
+    streetAddress,
+    city:
+      address.city ?? address.town ?? address.village ?? address.municipality,
+    state: address.state,
+    postcode: address.postcode,
+  });
 }
 
 function formatPhotonLabel(feature: PhotonFeature) {
@@ -74,20 +138,13 @@ function formatPhotonLabel(feature: PhotonFeature) {
   const streetAddress = [properties.housenumber, properties.street]
     .filter(Boolean)
     .join(" ");
-  const name = properties.name && properties.name !== streetAddress
-    ? properties.name
-    : "";
 
-  return [
-    streetAddress || name,
-    streetAddress && name ? name : "",
-    properties.city || properties.county,
-    properties.state,
-    properties.postcode,
-    properties.country,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  return formatAddressLabel({
+    streetAddress: streetAddress || properties.name,
+    city: properties.city,
+    state: properties.state,
+    postcode: properties.postcode,
+  });
 }
 
 function normalizeResults(data: NominatimResult[] | PhotonResponse) {
@@ -100,13 +157,16 @@ function normalizeResults(data: NominatimResult[] | PhotonResponse) {
       )
       .map((result) => ({
         id: String(result.place_id),
-        label: result.display_name,
+        label: formatNominatimLabel(result),
+        county: result.address?.county,
+        state: result.address?.state,
+        postcode: result.address?.postcode,
         latitude: Number(result.lat),
         longitude: Number(result.lon),
         precision:
           result.address?.house_number || result.type === "house" ? 2 : 1,
       }))
-      .filter((result) => isUnitedStatesLabel(result.label));
+      .filter((result) => result.label);
   }
 
   return data.features
@@ -116,10 +176,14 @@ function normalizeResults(data: NominatimResult[] | PhotonResponse) {
         feature.properties.osm_id ?? index
       }`,
       label: formatPhotonLabel(feature),
+      county: feature.properties.county,
+      state: feature.properties.state,
+      postcode: feature.properties.postcode,
       latitude: feature.geometry.coordinates[1],
       longitude: feature.geometry.coordinates[0],
       precision: feature.properties.housenumber ? 2 : 0,
-    }));
+    }))
+    .filter((result) => result.label);
 }
 
 function isUnitedStatesLabel(label: string) {
@@ -173,6 +237,16 @@ export function AddressAutocomplete({
     [],
   );
   const hasHouseNumber = /\d/.test(query);
+
+  useEffect(() => {
+    const animationFrame = window.requestAnimationFrame(() => {
+      setQuery(defaultValue);
+      setSelectedAddress(defaultValue);
+      setResults([]);
+    });
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [defaultValue]);
 
   useEffect(() => {
     if (!endpoint || !canSearch) {

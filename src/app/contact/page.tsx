@@ -11,8 +11,9 @@ export default function ContactPage() {
           Get help after using the online order flow.
         </h1>
         <p className="mt-4 text-base leading-7 text-emerald-950/65">
-          Pricing, estimating, and scheduling now start in the shop and checkout flow. Use
-          this form only for unusual access, custom requests, or questions.
+          Pricing, estimating, and scheduling now start in the guided order and
+          checkout flow. Use this form only for unusual access, custom requests,
+          or questions.
         </p>
       </div>
       <ContactForm />

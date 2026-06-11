@@ -21,7 +21,7 @@ export default function CalculatorPage() {
         </p>
         <Button asChild size="lg" className="mt-7">
           <Link href="/shop">
-            Ready? Start shopping
+            Ready? Shop mulch
             <ArrowRight />
           </Link>
         </Button>

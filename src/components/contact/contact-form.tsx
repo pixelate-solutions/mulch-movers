@@ -21,10 +21,6 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const materialOptions = [
   { label: "Mulch", value: "mulch" },
-  { label: "Gravel", value: "gravel" },
-  { label: "Sand", value: "sand" },
-  { label: "Soil", value: "soil" },
-  { label: "Other material", value: "other" },
 ];
 
 export function ContactForm() {
@@ -101,7 +97,7 @@ export function ContactForm() {
       <GlassCard className="p-6">
         <h2 className="text-2xl font-black text-emerald-950">Need help ordering?</h2>
         <p className="mt-3 text-sm leading-6 text-emerald-950/65">
-          Reach out if you need help choosing material, estimating quantity, or
+          Reach out if you need help choosing mulch, estimating quantity, or
           placing an order. We can help match the project to local supplier
           availability and delivery timing.
         </p>
@@ -121,7 +117,12 @@ export function ContactForm() {
             </span>
             <div>
               <p className="text-sm font-bold text-lime-700">Email</p>
-              <p className="font-black text-emerald-950">info@movingmulch.com</p>
+              <a
+                href="mailto:info@movingmulch.com"
+                className="font-black text-emerald-950 transition hover:cursor-pointer hover:text-emerald-700"
+              >
+                info@movingmulch.com
+              </a>
             </div>
           </div>
         </div>
@@ -181,10 +182,10 @@ export function ContactForm() {
               />
             </label>
             <label className="grid gap-2 text-sm font-bold text-emerald-950">
-              Material needed
+              Mulch needed
               <Select value={material} onValueChange={setMaterial}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose material" />
+                  <SelectValue placeholder="Choose mulch" />
                 </SelectTrigger>
                 <SelectContent>
                   {materialOptions.map((option) => (

@@ -1,6 +1,7 @@
 "use client";
 
-import { Calculator, Minus, Plus } from "lucide-react";
+import Link from "next/link";
+import { Calculator, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
 
 import { useCart } from "@/components/shop/cart-provider";
@@ -9,6 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/delivery";
 import type { Product } from "@/types/product";
+
+function formatYardQuantity(quantity: number) {
+  return `${quantity} ${quantity === 1 ? "yd" : "yds"}`;
+}
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem, items, updateQuantity } = useCart();
@@ -61,12 +66,20 @@ export function ProductCard({ product }: { product: Product }) {
                 type="button"
                 onClick={() => updateQuantity(product.id, quantity - 1)}
                 className="flex size-9 items-center justify-center rounded-full transition hover:cursor-pointer hover:bg-white/18 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-                aria-label={`Decrease ${product.name} quantity`}
+                aria-label={
+                  quantity === 1
+                    ? `Remove ${product.name} from cart`
+                    : `Decrease ${product.name} quantity`
+                }
               >
-                <Minus className="size-4" />
+                {quantity === 1 ? (
+                  <Trash2 className="size-4" />
+                ) : (
+                  <Minus className="size-4" />
+                )}
               </button>
               <span className="min-w-16 text-center text-sm font-black">
-                {quantity} yds
+                {formatYardQuantity(quantity)}
               </span>
               <button
                 type="button"
@@ -79,19 +92,31 @@ export function ProductCard({ product }: { product: Product }) {
               </button>
             </div>
           ) : (
-            <Button onClick={() => addItem(product)} className="w-full">
+            <Button
+              onClick={() => addItem(product)}
+              className="w-full bg-emerald-100 text-emerald-900 shadow-none hover:bg-emerald-200"
+            >
               <Plus />
               Add to Cart
             </Button>
           )}
         </div>
-        <a
-          href="/calculator"
-          className="mt-4 flex items-center justify-center gap-2 rounded-full py-2 text-sm font-bold text-emerald-700 transition hover:cursor-pointer hover:bg-emerald-50 hover:text-emerald-900"
-        >
-          <Calculator className="size-4" />
-          Estimate Material
-        </a>
+        {quantity > 0 ? (
+          <Button asChild variant="outline" className="mt-4 w-full">
+            <Link href="/cart">
+              <ShoppingBag />
+              View cart
+            </Link>
+          </Button>
+        ) : (
+          <a
+            href="/calculator"
+            className="mt-4 flex items-center justify-center gap-2 rounded-full py-2 text-sm font-bold text-emerald-700 transition hover:cursor-pointer hover:bg-emerald-50 hover:text-emerald-900"
+          >
+            <Calculator className="size-4" />
+            Estimate Material
+          </a>
+        )}
       </CardContent>
     </Card>
   );
