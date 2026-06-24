@@ -1,5 +1,17 @@
+import type { Metadata } from "next";
+
 import { AddressDeliveryEstimate } from "@/components/shop/address-delivery-estimate";
 import { ShopGrid } from "@/components/shop/shop-grid";
+import { absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Shop Mulch | Mulch Movers",
+  description:
+    "Browse mulch options and estimate delivery for Metro Detroit residential landscape projects.",
+  alternates: {
+    canonical: absoluteUrl("/shop"),
+  },
+};
 
 export default function ShopPage() {
   return (

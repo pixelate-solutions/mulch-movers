@@ -1,8 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { MaterialCalculator } from "@/components/calculator/material-calculator";
 import { Button } from "@/components/ui/button";
+import { absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Mulch Calculator | Mulch Movers",
+  description:
+    "Estimate cubic yards for mulch and landscape material orders before scheduling Metro Detroit delivery.",
+  alternates: {
+    canonical: absoluteUrl("/calculator"),
+  },
+};
 
 export default function CalculatorPage() {
   return (

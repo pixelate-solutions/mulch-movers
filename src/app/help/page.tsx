@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
+
 import { HelpFlow } from "@/components/help/help-flow";
+import { absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Guided Ordering Help | Mulch Movers",
+  description:
+    "Answer a few questions to choose mulch, estimate quantity, and build a residential landscape material order.",
+  alternates: {
+    canonical: absoluteUrl("/help"),
+  },
+};
 
 export default function HelpPage() {
   return (

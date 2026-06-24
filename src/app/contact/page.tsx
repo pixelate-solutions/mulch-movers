@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
+
 import { ContactForm } from "@/components/contact/contact-form";
+import { absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "Contact | Mulch Movers",
+  description:
+    "Contact Mulch Movers for custom landscape material delivery questions and Metro Detroit project help.",
+  alternates: {
+    canonical: absoluteUrl("/contact"),
+  },
+};
 
 export default function ContactPage() {
   return (

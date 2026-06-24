@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { CartProvider } from "@/components/shop/cart-provider";
 import { Footer } from "@/components/site/footer";
 import { Navbar } from "@/components/site/navbar";
+import { absoluteUrl, SITE_URL } from "@/lib/site";
 
 import "./globals.css";
 
@@ -18,9 +19,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Mulch Movers | We mulch. You enjoy.",
   description:
     "Veteran owned Mulch Movers sources mulch from trusted Metro Detroit suppliers for fast local delivery and installation.",
+  alternates: {
+    canonical: absoluteUrl("/"),
+  },
 };
 
 export default function RootLayout({

@@ -1,35 +1,35 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://www.movingmulch.com";
+import { absoluteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: BASE_URL,
+      url: absoluteUrl("/"),
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: `${BASE_URL}/shop`,
+      url: absoluteUrl("/shop"),
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/calculator`,
+      url: absoluteUrl("/calculator"),
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/contact`,
+      url: absoluteUrl("/contact"),
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,
     },
     {
-      url: `${BASE_URL}/help`,
+      url: absoluteUrl("/help"),
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,
